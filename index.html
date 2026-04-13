@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simulador de Colas</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #151820;
+      --surface2: #1c2030;
+      --border: #2a3045;
+      --accent: #4f8ef7;
+      --accent2: #7c3aed;
+      --green: #34d399;
+      --amber: #fbbf24;
+      --red: #f87171;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Syne', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    header { margin-bottom: 2.5rem; }
+
+    header h1 {
+      font-family: var(--sans);
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 0.3rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: sticky;
+      top: 2rem;
+    }
+
+    .panel h2 {
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+    }
+
+    .field { margin-bottom: 1rem; }
+
+    .field label {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .field input[type="number"] {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      padding: 0.5rem 0.7rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field input[type="number"]:focus { border-color: var(--accent); }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .toggle-group {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 0.45rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .toggle-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .section-title {
+      font-size: 0.72rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 1.2rem 0 0.7rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .conditional { display: none; }
+    .conditional.visible { display: block; }
+
+    .btn-run {
+      width: 100%;
+      margin-top: 1.2rem;
+      padding: 0.75rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn-run:hover { opacity: 0.88; }
+    .btn-run:active { transform: scale(0.98); }
+    .btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .results {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .results-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .results-header h2 {
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    #status { font-size: 0.72rem; color: var(--muted); }
+    #status.running { color: var(--amber); }
+    #status.done { color: var(--green); }
+
+    .table-wrap {
+      overflow-x: auto;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    thead th {
+      background: var(--surface2);
+      color: var(--muted);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.6rem 1rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      animation: fadeIn 0.2s ease;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface2); }
+
+    tbody td {
+      padding: 0.5rem 1rem;
+      text-align: center;
+      color: var(--text);
+    }
+
+    .cell-time { color: var(--accent); font-weight: 600; }
+    .cell-empty { color: var(--border); }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .badge-a   { background: rgba(79,142,247,0.15);  color: var(--accent); }
+    .badge-b   { background: rgba(124,58,237,0.15);  color: #a78bfa; }
+    .badge-on  { background: rgba(52,211,153,0.15);  color: var(--green); }
+    .badge-off { background: rgba(248,113,113,0.15); color: var(--red); }
+
+    .cell-grafico {
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      text-align: left;
+    }
+
+    .empty-state {
+      padding: 4rem 2rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .empty-state .icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.8rem;
+      display: block;
+      opacity: 0.4;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .panel { position: static; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Simulador de Colas</h1>
+  <p>Simulación de Eventos Discretos · Modelo de cola simple</p>
+</header>
+
+<div class="layout">
+
+  <aside class="panel">
+    <h2>Configuración</h2>
+
+    <div class="field">
+      <label>Tiempo total (segundos)</label>
+      <input type="number" id="tiempo_total" value="28800" min="1"/>
+    </div>
+
+    <div class="section-title">Tipos de clientes</div>
+    <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Prioridad A/B</label>
+    <div class="toggle-group" style="margin-top:0.3rem;">
+      <button class="toggle-btn active" onclick="setToggle('prioridad', false, this)">Sin prioridad</button>
+      <button class="toggle-btn" onclick="setToggle('prioridad', true, this)">Con prioridad</button>
+    </div>
+
+    <div id="bloque_sin_prioridad" class="conditional visible">
+      <div class="section-title">Llegada de clientes</div>
+      <div class="field-row">
+        <div class="field"><label>Mín</label><input type="number" id="llegada_min" value="40" min="1"/></div>
+        <div class="field"><label>Máx</label><input type="number" id="llegada_max" value="60" min="1"/></div>
+      </div>
+    </div>
+
+    <div id="bloque_con_prioridad" class="conditional">
+      <div class="section-title">Llegada tipo A</div>
+      <div class="field-row">
+        <div class="field"><label>Mín</label><input type="number" id="llegada_a_min" value="80" min="1"/></div>
+        <div class="field"><label>Máx</label><input type="number" id="llegada_a_max" value="120" min="1"/></div>
+      </div>
+      <div class="section-title">Llegada tipo B</div>
+      <div class="field-row">
+        <div class="field"><label>Mín</label><input type="number" id="llegada_b_min" value="40" min="1"/></div>
+        <div class="field"><label>Máx</label><input type="number" id="llegada_b_max" value="60" min="1"/></div>
+      </div>
+    </div>
+
+    <div class="section-title">Servicio</div>
+    <div class="field-row">
+      <div class="field"><label>Mín</label><input type="number" id="servicio_min" value="45" min="1"/></div>
+      <div class="field"><label>Máx</label><input type="number" id="servicio_max" value="50" min="1"/></div>
+    </div>
+
+    <div class="section-title">Descanso del servidor</div>
+    <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">¿El servidor se ausenta?</label>
+    <div class="toggle-group" style="margin-top:0.3rem;">
+      <button class="toggle-btn active" onclick="setToggle('descanso', false, this)">No</button>
+      <button class="toggle-btn" onclick="setToggle('descanso', true, this)">Sí</button>
+    </div>
+    <div id="bloque_descanso" class="conditional">
+      <div class="section-title">Tiempo hasta ausencia</div>
+      <div class="field-row">
+        <div class="field"><label>Mín</label><input type="number" id="salida_min" value="55" min="1"/></div>
+        <div class="field"><label>Máx</label><input type="number" id="salida_max" value="65" min="1"/></div>
+      </div>
+      <div class="section-title">Duración del descanso</div>
+      <div class="field-row">
+        <div class="field"><label>Mín</label><input type="number" id="descanso_min" value="25" min="1"/></div>
+        <div class="field"><label>Máx</label><input type="number" id="descanso_max" value="35" min="1"/></div>
+      </div>
+    </div>
+
+    <div class="section-title">Abandono</div>
+    <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">¿Clientes abandonan la cola?</label>
+    <div class="toggle-group" style="margin-top:0.3rem;">
+      <button class="toggle-btn active" onclick="setToggle('abandono', false, this)">No</button>
+      <button class="toggle-btn" onclick="setToggle('abandono', true, this)">Sí</button>
+    </div>
+    <div id="bloque_abandono" class="conditional">
+      <div id="bloque_abandono_general" class="conditional visible">
+        <div class="section-title">Paciencia del cliente</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="abandono_a_min" value="60" min="1"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="abandono_a_max" value="120" min="1"/></div>
+        </div>
+      </div>
+      <div id="bloque_abandono_prioridad" class="conditional">
+        <div class="section-title">Paciencia tipo A</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="abandono_a_min_p" value="90" min="1"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="abandono_a_max_p" value="120" min="1"/></div>
+        </div>
+        <div class="section-title">Paciencia tipo B</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="abandono_b_min" value="60" min="1"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="abandono_b_max" value="90" min="1"/></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-run" id="btn_run" onclick="ejecutar()">▶ Ejecutar simulación</button>
+  </aside>
+
+  <section class="results">
+    <div class="results-header">
+      <h2>Resultados</h2>
+      <span id="status">—</span>
+    </div>
+    <div class="table-wrap">
+      <div id="empty_state" class="empty-state">
+        <span class="icon">⬡</span>
+        Configurá la simulación y presioná Ejecutar
+      </div>
+      <table id="tabla" style="display:none;">
+        <thead id="thead"></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const state = { prioridad: false, descanso: false, abandono: false };
+
+  function setToggle(key, value, btn) {
+    state[key] = value;
+    const group = btn.parentElement;
+    group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    actualizarVisibilidad();
+  }
+
+  function actualizarVisibilidad() {
+    toggle('bloque_sin_prioridad', !state.prioridad);
+    toggle('bloque_con_prioridad', state.prioridad);
+    toggle('bloque_descanso', state.descanso);
+    toggle('bloque_abandono', state.abandono);
+    if (state.abandono) {
+      toggle('bloque_abandono_general', !state.prioridad);
+      toggle('bloque_abandono_prioridad', state.prioridad);
+    }
+  }
+
+  function toggle(id, visible) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('visible', visible);
+  }
+
+  function v(id) {
+    const el = document.getElementById(id);
+    return el ? parseInt(el.value) || null : null;
+  }
+
+  function buildConfig() {
+    const p = state.prioridad, d = state.descanso, a = state.abandono;
+    return {
+      tiempo_total: v('tiempo_total'),
+      tiene_prioridad: p,
+      tiene_descanso: d,
+      tiene_abandono: a,
+      llegada_min:    !p ? v('llegada_min')    : null,
+      llegada_max:    !p ? v('llegada_max')    : null,
+      llegada_a_min:   p ? v('llegada_a_min')  : null,
+      llegada_a_max:   p ? v('llegada_a_max')  : null,
+      llegada_b_min:   p ? v('llegada_b_min')  : null,
+      llegada_b_max:   p ? v('llegada_b_max')  : null,
+      servicio_min:  v('servicio_min'),
+      servicio_max:  v('servicio_max'),
+      salida_min:    d ? v('salida_min')   : null,
+      salida_max:    d ? v('salida_max')   : null,
+      descanso_min:  d ? v('descanso_min') : null,
+      descanso_max:  d ? v('descanso_max') : null,
+      abandono_a_min: a ? (p ? v('abandono_a_min_p') : v('abandono_a_min')) : null,
+      abandono_a_max: a ? (p ? v('abandono_a_max_p') : v('abandono_a_max')) : null,
+      abandono_b_min: a ? (p ? v('abandono_b_min')   : v('abandono_a_min')) : null,
+      abandono_b_max: a ? (p ? v('abandono_b_max')   : v('abandono_a_max')) : null,
+    };
+  }
+
+  function buildHeaders(config) {
+    const p = config.tiene_prioridad, d = config.tiene_descanso, a = config.tiene_abandono;
+    const cols = ['Hora actual'];
+    if (p) { cols.push('Próx. llegada A', 'Próx. llegada B'); }
+    else    { cols.push('Próx. llegada'); }
+    cols.push('Próx. fin serv.');
+    if (d) cols.push('Hora descanso', 'Hora trabajo');
+    if (a) {
+      if (p) cols.push('Abandono A', 'Abandono B');
+      else   cols.push('Hora abandono');
+    }
+    cols.push('PS');
+    if (p) cols.push('Cola A', 'Cola B');
+    else   cols.push('Cola');
+    if (d) cols.push('Servidor');
+    cols.push('Gráfico');  // Siempre presente al final
+    return cols;
+  }
+
+  function buildRow(fila, config) {
+    const p = config.tiene_prioridad, d = config.tiene_descanso, a = config.tiene_abandono;
+    const cells = [];
+
+    const cell = val => `<td>${val !== null && val !== '' ? val : '<span class="cell-empty">—</span>'}</td>`;
+    const timeCell = val => `<td class="cell-time">${val ?? '<span class="cell-empty">—</span>'}</td>`;
+    const boolCell = val => val
+      ? `<td><span class="badge badge-on">Sí</span></td>`
+      : `<td><span class="badge badge-off">No</span></td>`;
+
+    cells.push(timeCell(fila.tiempo_actual));
+
+    if (p) {
+      cells.push(cell(fila.proxima_llegada_a), cell(fila.proxima_llegada_b));
+    } else {
+      cells.push(cell(fila.proxima_llegada));
+    }
+
+    cells.push(cell(fila.proximo_fin_servicio));
+
+    if (d) {
+      cells.push(cell(fila.proximo_descanso), cell(fila.proximo_trabajo));
+    }
+
+    if (a) {
+      if (p) cells.push(cell(fila.proximo_abandono_a), cell(fila.proximo_abandono_b));
+      else   cells.push(cell(fila.proximo_abandono));
+    }
+
+    cells.push(boolCell(fila.puesto_de_servicio));
+
+    if (p) {
+      cells.push(
+        `<td><span class="badge badge-a">${fila.cola_a}</span></td>`,
+        `<td><span class="badge badge-b">${fila.cola_b}</span></td>`
+      );
+    } else {
+      cells.push(cell(fila.cola));
+    }
+
+    if (d) cells.push(boolCell(fila.servidor));
+
+    // Columna gráfico
+    cells.push(`<td class="cell-grafico">${fila.grafico ?? ''}</td>`);
+
+    return `<tr>${cells.join('')}</tr>`;
+  }
+
+  async function ejecutar() {
+    const config = buildConfig();
+    const btn = document.getElementById('btn_run');
+    const status = document.getElementById('status');
+    const tbody = document.getElementById('tbody');
+    const thead = document.getElementById('thead');
+    const tabla = document.getElementById('tabla');
+    const empty = document.getElementById('empty_state');
+
+    btn.disabled = true;
+    status.textContent = 'Ejecutando...';
+    status.className = 'running';
+    tbody.innerHTML = '';
+    empty.style.display = 'none';
+    tabla.style.display = 'table';
+
+    try {
+      const res = await fetch('/simular', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+      });
+
+      const data = await res.json();
+      const headers = buildHeaders(data.config);
+
+      thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+      tbody.innerHTML = '';
+
+      for (let i = 0; i < data.filas.length; i++) {
+        const tr = document.createElement('tbody');
+        tr.innerHTML = buildRow(data.filas[i], data.config);
+        tbody.appendChild(tr.firstElementChild);
+
+        if (i % 50 === 0) {
+          await new Promise(r => setTimeout(r, 0));
+        }
+      }
+
+      status.textContent = `${data.filas.length} eventos procesados`;
+      status.className = 'done';
+    } catch (e) {
+      status.textContent = 'Error al ejecutar';
+      status.className = '';
+      console.error(e);
+    }
+
+    btn.disabled = false;
+  }
+</script>
+</body>
+</html>

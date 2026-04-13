@@ -390,55 +390,6 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                         ].valido = False  # Marcar el evento de abandono como inválido
                         break
 
-                # Programar abandono del siguiente cliente en la cola (si quedan)
-                if cola_salida == "A" and self.sistema.cola_A:
-                    tiempo_abandono = self.generar_tiempo_abandono_a()
-                    tiempo_llegada_cliente = self.sistema.cola_A[0].hora_llegada
-                    evento_abandono = Evento(
-                        TipoEvento.ABANDONO, tiempo_llegada_cliente + tiempo_abandono
-                    )
-                    evento_abandono.id_cliente = self.sistema.cola_A[0].id
-                    heapq.heappush(
-                        self.eventos,
-                        (
-                            tiempo_llegada_cliente + tiempo_abandono,
-                            self.contador_eventos,
-                            evento_abandono,
-                        ),
-                    )
-                    self.contador_eventos += 1
-                elif cola_salida == "B" and self.sistema.cola_B:
-                    tiempo_abandono = self.generar_tiempo_abandono_b()
-                    tiempo_llegada_cliente = self.sistema.cola_B[0].hora_llegada
-                    evento_abandono = Evento(
-                        TipoEvento.ABANDONO, tiempo_llegada_cliente + tiempo_abandono
-                    )
-                    evento_abandono.id_cliente = self.sistema.cola_B[0].id
-                    heapq.heappush(
-                        self.eventos,
-                        (
-                            tiempo_llegada_cliente + tiempo_abandono,
-                            self.contador_eventos,
-                            evento_abandono,
-                        ),
-                    )
-                    self.contador_eventos += 1
-                elif cola_salida == "general" and self.sistema.cola:
-                    tiempo_abandono = self.generar_tiempo_abandono_a()
-                    tiempo_llegada_cliente = self.sistema.cola[0].hora_llegada
-                    evento_abandono = Evento(
-                        TipoEvento.ABANDONO, tiempo_llegada_cliente + tiempo_abandono
-                    )
-                    evento_abandono.id_cliente = self.sistema.cola[0].id
-                    heapq.heappush(
-                        self.eventos,
-                        (
-                            tiempo_llegada_cliente + tiempo_abandono,
-                            self.contador_eventos,
-                            evento_abandono,
-                        ),
-                    )
-                    self.contador_eventos += 1
         else:
             self.sistema.puesto_de_servicio = False  # Si no hay clientes en la cola, el puesto de servicio queda desocupado
             self.sistema.tiempo_fin_servicio_actual = (
@@ -569,59 +520,6 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                                 False  # Marcar el evento de abandono como inválido
                             )
                             break
-
-                    # Programar abandono del siguiente en cola (si aplica)
-                    if cola_salida == "A" and self.sistema.cola_A:
-                        tiempo_abandono = self.generar_tiempo_abandono_a()
-                        tiempo_llegada_cliente = self.sistema.cola_A[0].hora_llegada
-                        evento_abandono = Evento(
-                            TipoEvento.ABANDONO,
-                            tiempo_llegada_cliente + tiempo_abandono,
-                        )
-                        evento_abandono.id_cliente = self.sistema.cola_A[0].id
-                        heapq.heappush(
-                            self.eventos,
-                            (
-                                tiempo_llegada_cliente + tiempo_abandono,
-                                self.contador_eventos,
-                                evento_abandono,
-                            ),
-                        )
-                        self.contador_eventos += 1
-                    elif cola_salida == "B" and self.sistema.cola_B:
-                        tiempo_abandono = self.generar_tiempo_abandono_b()
-                        tiempo_llegada_cliente = self.sistema.cola_B[0].hora_llegada
-                        evento_abandono = Evento(
-                            TipoEvento.ABANDONO,
-                            tiempo_llegada_cliente + tiempo_abandono,
-                        )
-                        evento_abandono.id_cliente = self.sistema.cola_B[0].id
-                        heapq.heappush(
-                            self.eventos,
-                            (
-                                tiempo_llegada_cliente + tiempo_abandono,
-                                self.contador_eventos,
-                                evento_abandono,
-                            ),
-                        )
-                        self.contador_eventos += 1
-                    elif cola_salida == "general" and self.sistema.cola:
-                        tiempo_abandono = self.generar_tiempo_abandono_a()
-                        tiempo_llegada_cliente = self.sistema.cola[0].hora_llegada
-                        evento_abandono = Evento(
-                            TipoEvento.ABANDONO,
-                            tiempo_llegada_cliente + tiempo_abandono,
-                        )
-                        evento_abandono.id_cliente = self.sistema.cola[0].id
-                        heapq.heappush(
-                            self.eventos,
-                            (
-                                tiempo_llegada_cliente + tiempo_abandono,
-                                self.contador_eventos,
-                                evento_abandono,
-                            ),
-                        )
-                        self.contador_eventos += 1
 
         # Generar el próximo evento de salida del servidor
         tiempo_salida_servidor = (

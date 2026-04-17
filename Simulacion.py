@@ -15,12 +15,28 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
         self.contador_eventos = 0  # Contador para asignar un ID único a cada evento
         self.contador_clientes = 0  # Contador para asignar un ID único a cada cliente
 
-    # ── Generadores de tiempo ──────────────────────────────────────────────────
+        # Métricas de la simulación 
+        self.clientes_atendidos = 0  # Cantidad de clientes que completaron su servicio
+        self.clientes_atendidos_a = 0  
+        self.clientes_atendidos_b = 0  
+        self.clientes_abandonaron = 0  # Cantidad de clientes que abandonaron la cola
+        self.clientes_abandonaron_a = 0  
+        self.clientes_abandonaron_b = 0  
+        self.tiempos_espera = []  # Lista de tiempos de espera de cada cliente atendido (para calcular promedio al final)
+        self.tiempos_espera_a = []  
+        self.tiempos_espera_b = []  
+        self.tiempo_servidor_ocupado = 0  # Tiempo total que el PS estuvo ocupado
+        self.tiempo_servidor_ausente = 0  # Tiempo total que el servidor estuvo ausente
+        self._tiempo_inicio_servicio = None  # Auxiliar para calcular tiempo ocupado
+        self._tiempo_inicio_ausencia = None  # Auxiliar para calcular tiempo ausente
+
+    # Generadores de tiempo 
 
     def generar_tiempo_llegada(self):
         minimo = self.config["llegada_min"]
         maximo = self.config["llegada_max"]
         return random.randint(minimo, maximo) if minimo != maximo else minimo
+    
 
     def generar_tiempo_llegada_a(self):
         minimo = self.config["llegada_a_min"]
@@ -57,7 +73,7 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
         maximo = self.config["abandono_b_max"]
         return random.randint(minimo, maximo) if minimo != maximo else minimo
 
-    # ── Métodos de obtención de próximos eventos ───────────────────────────────
+    #  Métodos de obtención de próximos eventos 
 
     def obtener_proxima_llegada(self):
         for evento in self.eventos:
@@ -68,24 +84,32 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
     def obtener_proxima_llegada_a(self):
         for evento in self.eventos:
             if evento[2].tipo == TipoEvento.LLEGADA_A:
-                return evento[
-                    0
-                ]  # Retorna el tiempo de la próxima llegada de un cliente tipo A
+                return evento[0]  # Retorna el tiempo de la próxima llegada de un cliente tipo A
         return ""  # Si no hay eventos de llegada de clientes tipo A programados
 
     def obtener_proxima_llegada_b(self):
         for evento in self.eventos:
             if evento[2].tipo == TipoEvento.LLEGADA_B:
-                return evento[
-                    0
-                ]  # Retorna el tiempo de la próxima llegada de un cliente tipo B
+                return evento[0]  # Retorna el tiempo de la próxima llegada de un cliente tipo B
         return ""  # Si no hay eventos de llegada de clientes tipo B programados
 
+
     def obtener_proximo_fin_servicio(self):
+        #Intentamos buscar un evento de fin de servicio que sea válido (servidor presente)
         for evento in self.eventos:
-            if evento[2].tipo == TipoEvento.FIN_SERVICIO:
-                return evento[0]  # Retorna el tiempo del próximo fin de servicio
-        return ""  # Si no hay eventos de fin de servicio programados
+            if evento[2].tipo == TipoEvento.FIN_SERVICIO and evento[2].valido:
+                return evento[0]
+
+        # Si no hay evento válido, pero el servidor está ausente y el PS ocupado. Entonces proyectamos el fin de servicio para la tabla, para que el usuario tenga una referencia de cuándo podría terminar el servicio del cliente actual si el servidor regresa pronto. (Es sólo estético, no afecta la lógica de la simulación)
+        if not self.sistema.servidor and self.sistema.puesto_de_servicio:
+            hora_regreso_sv = self.obtener_proximo_trabajo()
+            tiempo_restante = self.sistema.tiempo_restante_servicio_actual
+
+            # Si tenemos ambos datos, proyectamos el fin de servicio para la tabla
+            if hora_regreso_sv != "" and tiempo_restante is not None:
+                return hora_regreso_sv + tiempo_restante
+
+        return ""  # Realmente vacío solo si no hay nadie en el PS
 
     def obtener_proximo_descanso(self):
         for evento in self.eventos:
@@ -108,30 +132,18 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
     def obtener_proximo_abandono_a(self):
         ids_cola_a = [cliente.id for cliente in self.sistema.cola_A]
         for evento in self.eventos:
-            if (
-                evento[2].tipo == TipoEvento.ABANDONO
-                and evento[2].valido
-                and evento[2].id_cliente in ids_cola_a
-            ):
-                return evento[
-                    0
-                ]  # Retorna el tiempo del próximo abandono de un cliente tipo A
+            if (evento[2].tipo == TipoEvento.ABANDONO and evento[2].valido and evento[2].id_cliente in ids_cola_a): #
+                return evento[0]  # Retorna el tiempo del próximo abandono de un cliente tipo A
         return ""  # Si no hay eventos de abandono de clientes tipo A programados
 
     def obtener_proximo_abandono_b(self):
         ids_cola_b = [cliente.id for cliente in self.sistema.cola_B]
         for evento in self.eventos:
-            if (
-                evento[2].tipo == TipoEvento.ABANDONO
-                and evento[2].valido
-                and evento[2].id_cliente in ids_cola_b
-            ):
-                return evento[
-                    0
-                ]  # Retorna el tiempo del próximo abandono de un cliente tipo B
+            if (evento[2].tipo == TipoEvento.ABANDONO and evento[2].valido and evento[2].id_cliente in ids_cola_b ):
+                return evento[0]  # Retorna el tiempo del próximo abandono de un cliente tipo B
         return ""  # Si no hay eventos de abandono de clientes tipo B programados
 
-    # ── Procesadores de eventos ────────────────────────────────────────────────
+    #  Procesadores de eventos 
 
     def procesar_llegada(self, evento):
         tiene_abandono = self.config["tiene_abandono"]
@@ -158,6 +170,8 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                 ),
             )
             self.contador_eventos += 1
+            self._tiempo_inicio_servicio = self.tiempo_actual
+            self.tiempos_espera.append(0)  # El cliente no esperó en cola
         else:
             nuevo_cliente = Cliente(
                 self.contador_clientes, self.tiempo_actual, "general"
@@ -222,6 +236,9 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                 ),
             )
             self.contador_eventos += 1
+            self._tiempo_inicio_servicio = self.tiempo_actual
+            self.tiempos_espera.append(0)  # El cliente no esperó en cola
+            self.tiempos_espera_a.append(0)
         else:
             nuevo_cliente = Cliente(self.contador_clientes, self.tiempo_actual, "A")
             self.sistema.cola_A.append(
@@ -288,6 +305,9 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                 ),
             )
             self.contador_eventos += 1
+            self._tiempo_inicio_servicio = self.tiempo_actual
+            self.tiempos_espera.append(0)  # El cliente no esperó en cola
+            self.tiempos_espera_b.append(0)
         else:
             nuevo_cliente = Cliente(self.contador_clientes, self.tiempo_actual, "B")
             self.sistema.cola_B.append(
@@ -333,6 +353,13 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
         tiene_prioridad = self.config["tiene_prioridad"]
         tiene_abandono = self.config["tiene_abandono"]
 
+        # Registrar tiempo de ocupación del PS para el cliente que termina
+        if self._tiempo_inicio_servicio is not None:
+            self.tiempo_servidor_ocupado += (
+                self.tiempo_actual - self._tiempo_inicio_servicio
+            )
+            self._tiempo_inicio_servicio = None
+
         # Determinar si hay clientes en cola
         if tiene_prioridad:
             hay_cola = bool(self.sistema.cola_A or self.sistema.cola_B)
@@ -358,6 +385,21 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                 )  # Sacar al primer cliente de la cola
                 cola_salida = "general"
 
+            # Registrar métricas del cliente que termina de ser atendido
+            self.clientes_atendidos += 1
+            if cola_salida == "A":
+                self.clientes_atendidos_a += 1
+            elif cola_salida == "B":
+                self.clientes_atendidos_b += 1
+
+            # Registrar tiempo de espera del cliente que sale de la cola hacia el PS
+            tiempo_espera = self.tiempo_actual - cliente_atendido.hora_llegada
+            self.tiempos_espera.append(tiempo_espera)
+            if cola_salida == "A":
+                self.tiempos_espera_a.append(tiempo_espera)
+            elif cola_salida == "B":
+                self.tiempos_espera_b.append(tiempo_espera)
+
             # Iniciar servicio para el siguiente cliente
             tiempo_servicio = (
                 self.generar_tiempo_servicio()
@@ -377,6 +419,7 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                 ),
             )
             self.contador_eventos += 1
+            self._tiempo_inicio_servicio = self.tiempo_actual
 
             # Invalidar el evento de abandono del cliente que acaba de pasar al PS (si aplica)
             if tiene_abandono:
@@ -391,6 +434,8 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                         break
 
         else:
+            # Registrar al último cliente atendido antes de que el PS quede libre
+            self.clientes_atendidos += 1
             self.sistema.puesto_de_servicio = False  # Si no hay clientes en la cola, el puesto de servicio queda desocupado
             self.sistema.tiempo_fin_servicio_actual = (
                 None  # Reiniciar el tiempo de fin de servicio actual
@@ -400,6 +445,9 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
         self.sistema.servidor = (
             False  # El servidor sale, por lo que se marca como no disponible
         )
+        self._tiempo_inicio_ausencia = (
+            self.tiempo_actual
+        )  # Registrar inicio de ausencia
 
         # Si el servidor sale mientras un cliente está siendo atendido, se invalida el evento de fin de servicio actual
         if self.sistema.tiempo_fin_servicio_actual is not None:
@@ -444,6 +492,13 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
             True  # El servidor llega, por lo que se marca como disponible
         )
 
+        # Registrar tiempo de ausencia
+        if self._tiempo_inicio_ausencia is not None:
+            self.tiempo_servidor_ausente += (
+                self.tiempo_actual - self._tiempo_inicio_ausencia
+            )
+            self._tiempo_inicio_ausencia = None
+
         # Si el servidor llega y hay un cliente esperando en el puesto de servicio, se reanuda su servicio
         if (
             self.sistema.puesto_de_servicio
@@ -459,6 +514,9 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
             )
             self.contador_eventos += 1
             self.sistema.tiempo_restante_servicio_actual = None
+            self._tiempo_inicio_servicio = (
+                self.tiempo_actual
+            )  # Reanudamos el conteo de ocupación
 
         # Si el servidor llega y el puesto está libre pero hay clientes en cola, se atiende al siguiente
         elif not self.sistema.puesto_de_servicio:
@@ -487,6 +545,14 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                     )  # Sacar al primer cliente de la cola
                     cola_salida = "general"
 
+                # Registrar tiempo de espera
+                tiempo_espera = self.tiempo_actual - cliente_atendido.hora_llegada
+                self.tiempos_espera.append(tiempo_espera)
+                if cola_salida == "A":
+                    self.tiempos_espera_a.append(tiempo_espera)
+                elif cola_salida == "B":
+                    self.tiempos_espera_b.append(tiempo_espera)
+
                 tiempo_servicio = (
                     self.generar_tiempo_servicio()
                 )  # Generar el tiempo de servicio para el siguiente cliente
@@ -506,6 +572,7 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                 )
                 self.contador_eventos += 1
                 self.sistema.tiempo_restante_servicio_actual = None
+                self._tiempo_inicio_servicio = self.tiempo_actual
 
                 # Invalidar abandono del cliente que pasa al PS (si aplica)
                 if tiene_abandono:
@@ -554,24 +621,8 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                 self.sistema.cola_A.remove(
                     cliente_abandono
                 )  # Eliminar al cliente de tipo A que abandona
-
-                # Si quedan clientes de tipo A, programar abandono del siguiente
-                if self.sistema.cola_A:
-                    tiempo_abandono = self.generar_tiempo_abandono_a()
-                    tiempo_llegada_cliente = self.sistema.cola_A[0].hora_llegada
-                    evento_abandono = Evento(
-                        TipoEvento.ABANDONO, tiempo_llegada_cliente + tiempo_abandono
-                    )
-                    evento_abandono.id_cliente = self.sistema.cola_A[0].id
-                    heapq.heappush(
-                        self.eventos,
-                        (
-                            tiempo_llegada_cliente + tiempo_abandono,
-                            self.contador_eventos,
-                            evento_abandono,
-                        ),
-                    )
-                    self.contador_eventos += 1
+                self.clientes_abandonaron += 1
+                self.clientes_abandonaron_a += 1
 
             elif self.sistema.cola_B and evento.id_cliente in [
                 cliente.id for cliente in self.sistema.cola_B
@@ -584,24 +635,8 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                 self.sistema.cola_B.remove(
                     cliente_abandono
                 )  # Eliminar al cliente de tipo B que abandona
-
-                # Si quedan clientes de tipo B, programar abandono del siguiente
-                if self.sistema.cola_B:
-                    tiempo_abandono = self.generar_tiempo_abandono_b()
-                    tiempo_llegada_cliente = self.sistema.cola_B[0].hora_llegada
-                    evento_abandono = Evento(
-                        TipoEvento.ABANDONO, tiempo_llegada_cliente + tiempo_abandono
-                    )
-                    evento_abandono.id_cliente = self.sistema.cola_B[0].id
-                    heapq.heappush(
-                        self.eventos,
-                        (
-                            tiempo_llegada_cliente + tiempo_abandono,
-                            self.contador_eventos,
-                            evento_abandono,
-                        ),
-                    )
-                    self.contador_eventos += 1
+                self.clientes_abandonaron += 1
+                self.clientes_abandonaron_b += 1
         else:
             # Buscar el cliente por ID en la cola general
             if self.sistema.cola and evento.id_cliente in [
@@ -615,26 +650,50 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                 self.sistema.cola.remove(
                     cliente_abandono
                 )  # Eliminar al cliente que abandona
+                self.clientes_abandonaron += 1
 
-                # Si quedan clientes, programar abandono del siguiente
-                if self.sistema.cola:
-                    tiempo_abandono = self.generar_tiempo_abandono_a()
-                    tiempo_llegada_cliente = self.sistema.cola[0].hora_llegada
-                    evento_abandono = Evento(
-                        TipoEvento.ABANDONO, tiempo_llegada_cliente + tiempo_abandono
-                    )
-                    evento_abandono.id_cliente = self.sistema.cola[0].id
-                    heapq.heappush(
-                        self.eventos,
-                        (
-                            tiempo_llegada_cliente + tiempo_abandono,
-                            self.contador_eventos,
-                            evento_abandono,
-                        ),
-                    )
-                    self.contador_eventos += 1
+    def obtener_metricas(self):
+        """Devuelve un diccionario con todas las métricas al final de la simulación."""
+        tiene_prioridad = self.config["tiene_prioridad"]
+        tiene_descanso = self.config["tiene_descanso"]
 
-    # ── Inicio y encabezado ────────────────────────────────────────────────────
+        def promedio(lista):
+            return round(sum(lista) / len(lista), 2) if lista else 0
+
+        def maximo(lista):
+            return max(lista) if lista else 0
+
+        ocupacion = (
+            round((self.tiempo_servidor_ocupado / self.tiempo_total) * 100, 1)
+            if self.tiempo_total > 0
+            else 0
+        )
+
+        metricas = {
+            "clientes_atendidos": self.clientes_atendidos,
+            "clientes_abandonaron": self.clientes_abandonaron,
+            "espera_promedio": promedio(self.tiempos_espera),
+            "espera_maxima": maximo(self.tiempos_espera),
+            "ocupacion_servidor": ocupacion,
+            "tiempo_servidor_ocupado": round(self.tiempo_servidor_ocupado, 2),
+        }
+
+        if tiene_descanso:
+            metricas["tiempo_servidor_ausente"] = round(self.tiempo_servidor_ausente, 2)
+
+        if tiene_prioridad:
+            metricas["clientes_atendidos_a"] = self.clientes_atendidos_a
+            metricas["clientes_atendidos_b"] = self.clientes_atendidos_b
+            metricas["clientes_abandonaron_a"] = self.clientes_abandonaron_a
+            metricas["clientes_abandonaron_b"] = self.clientes_abandonaron_b
+            metricas["espera_promedio_a"] = promedio(self.tiempos_espera_a)
+            metricas["espera_promedio_b"] = promedio(self.tiempos_espera_b)
+            metricas["espera_maxima_a"] = maximo(self.tiempos_espera_a)
+            metricas["espera_maxima_b"] = maximo(self.tiempos_espera_b)
+
+        return metricas
+
+    #  Inicio y encabezado 
 
     def inicio(self):
         tiene_prioridad = self.config["tiene_prioridad"]
@@ -728,26 +787,22 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
         print("|" + "|".join(cols) + "|")
         print("|" + "|".join(sep) + "|")
 
-    # ── Ejecutar ───────────────────────────────────────────────────────────────
+    #  Ejecutar 
 
     def ejecutar(self):
         tiene_prioridad = self.config["tiene_prioridad"]
         tiene_descanso = self.config["tiene_descanso"]
         tiene_abandono = self.config["tiene_abandono"]
 
-        while (
-            self.eventos and self.tiempo_actual < self.tiempo_total
-        ):  # Mientras haya eventos en la cola y el tiempo actual sea menor al tiempo total de la simulación
-
+        while self.eventos: # Mientras haya eventos programados en la simulación
             evento = heapq.heappop(self.eventos)
-            if not evento[
-                2
-            ].valido:  # Si el evento ha sido invalidado, se ignora y se continúa con el siguiente evento
+            if not evento[2].valido:  # Si el evento ha sido invalidado, se ignora y se continúa con el siguiente evento
                 continue
 
-            self.tiempo_actual = evento[
-                0
-            ]  # Actualizar el tiempo actual al tiempo del evento
+            if evento[0] > self.tiempo_total:
+                break  # Si el tiempo del evento excede el tiempo total de simulación, se detiene la simulación
+
+            self.tiempo_actual = evento[0]  # Actualizar el tiempo actual al tiempo del evento
 
             if evento[2].tipo == TipoEvento.LLEGADA:
                 self.procesar_llegada(evento[2])  # Procesar el evento de llegada
@@ -824,7 +879,7 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
         if tiene_descanso:
             grafico += "D" if self.sistema.servidor else " "
         else:
-            grafico += "D"  # Si no hay descanso, se muestra "D" para indicar que el servidor está disponible (aunque no pueda descansar)
+            grafico += "D"
         if tiene_prioridad:
             grafico += "A" * len(self.sistema.cola_A) + "B" * len(self.sistema.cola_B)
         else:

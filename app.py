@@ -135,4 +135,7 @@ async def simular(config_req: ConfigRequest):
     sim.inicio()
     sim.ejecutar()
 
-    return {"config": config, "filas": resultados}
+    # Obtener métricas finales de la simulación
+    metricas = sim.obtener_metricas()
+
+    return {"config": config, "filas": resultados, "metricas": metricas}

@@ -1,5 +1,6 @@
 from Simulacion import Simulacion
 
+# Ya no se usará el main, ya que tenemos la app.py para manejar la interacción con el usuario, pero lo dejo por si hace falta ejecutar la simulación sin la interfaz gráfica en algún momento.
 
 def pedir_int(mensaje, minimo=1):
     while True:
@@ -35,7 +36,7 @@ if __name__ == "__main__":
 
     tiempo_total = pedir_int("\nTiempo total de simulación (en segundos): ", minimo=1)
 
-    # ── Tipos de clientes y prioridad ──────────────────────────
+    #  Tipos de clientes y prioridad 
     print("\n--- Tipos de clientes ---")
     print("¿Hay dos tipos de clientes (A y B) con prioridad?")
     print("  1) No — un solo tipo de cliente")
@@ -50,11 +51,11 @@ if __name__ == "__main__":
         llegada_min, llegada_max = pedir_rango("llegada de clientes")
         llegada_a_min = llegada_a_max = llegada_b_min = llegada_b_max = None
 
-    # ── Tiempo de servicio ─────────────────────────────────────
+    #  Tiempo de servicio 
     print("\n--- Tiempo de servicio ---")
     servicio_min, servicio_max = pedir_rango("servicio")
 
-    # ── Descanso del servidor ──────────────────────────────────
+    # Descanso del servidor 
     print("\n--- Servidor ---")
     print("¿El servidor puede ausentarse?")
     print("  1) No")
@@ -66,7 +67,7 @@ if __name__ == "__main__":
         salida_min, salida_max = pedir_rango("tiempo hasta que el servidor se ausenta")
         descanso_min, descanso_max = pedir_rango("duración del descanso del servidor")
 
-    # ── Abandono de clientes ───────────────────────────────────
+    #  Abandono de clientes 
     print("\n--- Abandono ---")
     print("¿Los clientes pueden abandonar la cola si esperan demasiado?")
     print("  1) No")
@@ -91,7 +92,7 @@ if __name__ == "__main__":
                 abandono_a_max,
             )  # Se usa el mismo para ambos en modo general
 
-    # ── Armar configuración y lanzar simulación ────────────────
+    #Armar configuración y lanzar simulación. Config es un diccionario que pasaremos a la simulación. 
     config = {
         "tiene_prioridad": tiene_prioridad,
         "tiene_descanso": tiene_descanso,

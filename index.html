@@ -24,263 +24,93 @@
       --sans: 'Syne', sans-serif;
     }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--mono);
-      min-height: 100vh;
-      padding: 2rem;
-    }
+    body { background: var(--bg); color: var(--text); font-family: var(--mono); min-height: 100vh; padding: 2rem; }
 
     header { margin-bottom: 2.5rem; }
-
     header h1 {
-      font-family: var(--sans);
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
+      font-family: var(--sans); font-size: 2rem; font-weight: 800; letter-spacing: -0.03em;
       background: linear-gradient(90deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
+    header p { color: var(--muted); font-size: 0.8rem; margin-top: 0.3rem; }
 
-    header p {
-      color: var(--muted);
-      font-size: 0.8rem;
-      margin-top: 0.3rem;
-    }
+    .layout { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; align-items: start; }
 
-    .layout {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 1.5rem;
-      align-items: start;
-    }
-
-    .panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      position: sticky;
-      top: 2rem;
-    }
-
-    .panel h2 {
-      font-family: var(--sans);
-      font-size: 0.85rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      margin-bottom: 1.2rem;
-    }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; position: sticky; top: 2rem; }
+    .panel h2 { font-family: var(--sans); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1.2rem; }
 
     .field { margin-bottom: 1rem; }
-
-    .field label {
-      display: block;
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-bottom: 0.3rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .field input[type="number"] {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 0.85rem;
-      padding: 0.5rem 0.7rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
+    .field label { display: block; font-size: 0.72rem; color: var(--muted); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .field input[type="number"] { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: var(--mono); font-size: 0.85rem; padding: 0.5rem 0.7rem; outline: none; transition: border-color 0.2s; }
     .field input[type="number"]:focus { border-color: var(--accent); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
 
-    .field-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
-    }
+    .toggle-group { display: flex; gap: 0.4rem; margin-bottom: 1rem; }
+    .toggle-btn { flex: 1; padding: 0.45rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-family: var(--mono); font-size: 0.75rem; cursor: pointer; transition: all 0.15s; text-align: center; }
+    .toggle-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-    .toggle-group {
-      display: flex;
-      gap: 0.4rem;
-      margin-bottom: 1rem;
-    }
-
-    .toggle-btn {
-      flex: 1;
-      padding: 0.45rem;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: all 0.15s;
-      text-align: center;
-    }
-
-    .toggle-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-
-    .section-title {
-      font-size: 0.72rem;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin: 1.2rem 0 0.7rem;
-      padding-bottom: 0.4rem;
-      border-bottom: 1px solid var(--border);
-    }
+    .section-title { font-size: 0.72rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin: 1.2rem 0 0.7rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
 
     .conditional { display: none; }
     .conditional.visible { display: block; }
 
-    .btn-run {
-      width: 100%;
-      margin-top: 1.2rem;
-      padding: 0.75rem;
-      background: var(--accent);
-      border: none;
-      border-radius: 8px;
-      color: #fff;
-      font-family: var(--sans);
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
-    }
-
+    .btn-run { width: 100%; margin-top: 1.2rem; padding: 0.75rem; background: var(--accent); border: none; border-radius: 8px; color: #fff; font-family: var(--sans); font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s, transform 0.1s; }
     .btn-run:hover { opacity: 0.88; }
     .btn-run:active { transform: scale(0.98); }
     .btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .results {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-    }
+    /* ── Métricas ── */
+    .metricas-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; display: none; }
+    .metricas-panel.visible { display: block; }
+    .metricas-panel h2 { font-family: var(--sans); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1.2rem; }
 
-    .results-header {
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+    .metricas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 0.8rem; }
 
-    .results-header h2 {
-      font-family: var(--sans);
-      font-size: 0.85rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-    }
+    .metrica-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1rem; }
+    .metrica-card .label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem; }
+    .metrica-card .value { font-size: 1.3rem; font-weight: 700; color: var(--text); }
+    .metrica-card .value.accent { color: var(--accent); }
+    .metrica-card .value.green  { color: var(--green); }
+    .metrica-card .value.amber  { color: var(--amber); }
+    .metrica-card .value.red    { color: var(--red); }
+
+    .metricas-seccion { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .metricas-seccion-title { font-size: 0.68rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.7rem; }
+
+    /* ── Tabla ── */
+    .results { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .results-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .results-header h2 { font-family: var(--sans); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
 
     #status { font-size: 0.72rem; color: var(--muted); }
     #status.running { color: var(--amber); }
     #status.done { color: var(--green); }
 
-    .table-wrap {
-      overflow-x: auto;
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.78rem;
-      white-space: nowrap;
-    }
-
-    thead th {
-      background: var(--surface2);
-      color: var(--muted);
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding: 0.6rem 1rem;
-      text-align: center;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-
-    tbody tr {
-      border-bottom: 1px solid var(--border);
-      animation: fadeIn 0.2s ease;
-    }
-
+    .table-wrap { overflow-x: auto; max-height: 60vh; overflow-y: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.78rem; white-space: nowrap; }
+    thead th { background: var(--surface2); color: var(--muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.6rem 1rem; text-align: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1; }
+    tbody tr { border-bottom: 1px solid var(--border); animation: fadeIn 0.2s ease; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: var(--surface2); }
-
-    tbody td {
-      padding: 0.5rem 1rem;
-      text-align: center;
-      color: var(--text);
-    }
+    tbody td { padding: 0.5rem 1rem; text-align: center; color: var(--text); }
 
     .cell-time { color: var(--accent); font-weight: 600; }
     .cell-empty { color: var(--border); }
 
-    .badge {
-      display: inline-block;
-      padding: 0.15rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      font-weight: 600;
-    }
-
+    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
     .badge-a   { background: rgba(79,142,247,0.15);  color: var(--accent); }
     .badge-b   { background: rgba(124,58,237,0.15);  color: #a78bfa; }
     .badge-on  { background: rgba(52,211,153,0.15);  color: var(--green); }
     .badge-off { background: rgba(248,113,113,0.15); color: var(--red); }
 
-    .cell-grafico {
-      font-size: 1rem;
-      letter-spacing: 0.05em;
-      text-align: left;
-    }
+    .cell-grafico { font-size: 1rem; letter-spacing: 0.05em; text-align: left; }
 
-    .empty-state {
-      padding: 4rem 2rem;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.85rem;
-    }
+    .empty-state { padding: 4rem 2rem; text-align: center; color: var(--muted); font-size: 0.85rem; }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.8rem; display: block; opacity: 0.4; }
 
-    .empty-state .icon {
-      font-size: 2.5rem;
-      margin-bottom: 0.8rem;
-      display: block;
-      opacity: 0.4;
-    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 900px) {
-      .layout { grid-template-columns: 1fr; }
-      .panel { position: static; }
-    }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .panel { position: static; } }
   </style>
 </head>
 <body>
@@ -384,22 +214,31 @@
     <button class="btn-run" id="btn_run" onclick="ejecutar()">▶ Ejecutar simulación</button>
   </aside>
 
-  <section class="results">
-    <div class="results-header">
-      <h2>Resultados</h2>
-      <span id="status">—</span>
+  <div>
+    <!-- ── Panel de métricas ── -->
+    <div class="metricas-panel" id="metricas_panel">
+      <h2>Resumen de la simulación</h2>
+      <div id="metricas_contenido"></div>
     </div>
-    <div class="table-wrap">
-      <div id="empty_state" class="empty-state">
-        <span class="icon">⬡</span>
-        Configurá la simulación y presioná Ejecutar
+
+    <!-- ── Tabla de resultados ── -->
+    <section class="results">
+      <div class="results-header">
+        <h2>Resultados</h2>
+        <span id="status">—</span>
       </div>
-      <table id="tabla" style="display:none;">
-        <thead id="thead"></thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-  </section>
+      <div class="table-wrap">
+        <div id="empty_state" class="empty-state">
+          <span class="icon">⬡</span>
+          Configurá la simulación y presioná Ejecutar
+        </div>
+        <table id="tabla" style="display:none;">
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
 
 </div>
 
@@ -439,21 +278,16 @@
     const p = state.prioridad, d = state.descanso, a = state.abandono;
     return {
       tiempo_total: v('tiempo_total'),
-      tiene_prioridad: p,
-      tiene_descanso: d,
-      tiene_abandono: a,
+      tiene_prioridad: p, tiene_descanso: d, tiene_abandono: a,
       llegada_min:    !p ? v('llegada_min')    : null,
       llegada_max:    !p ? v('llegada_max')    : null,
       llegada_a_min:   p ? v('llegada_a_min')  : null,
       llegada_a_max:   p ? v('llegada_a_max')  : null,
       llegada_b_min:   p ? v('llegada_b_min')  : null,
       llegada_b_max:   p ? v('llegada_b_max')  : null,
-      servicio_min:  v('servicio_min'),
-      servicio_max:  v('servicio_max'),
-      salida_min:    d ? v('salida_min')   : null,
-      salida_max:    d ? v('salida_max')   : null,
-      descanso_min:  d ? v('descanso_min') : null,
-      descanso_max:  d ? v('descanso_max') : null,
+      servicio_min: v('servicio_min'), servicio_max: v('servicio_max'),
+      salida_min:    d ? v('salida_min')   : null, salida_max:    d ? v('salida_max')   : null,
+      descanso_min:  d ? v('descanso_min') : null, descanso_max:  d ? v('descanso_max') : null,
       abandono_a_min: a ? (p ? v('abandono_a_min_p') : v('abandono_a_min')) : null,
       abandono_a_max: a ? (p ? v('abandono_a_max_p') : v('abandono_a_max')) : null,
       abandono_b_min: a ? (p ? v('abandono_b_min')   : v('abandono_a_min')) : null,
@@ -464,26 +298,20 @@
   function buildHeaders(config) {
     const p = config.tiene_prioridad, d = config.tiene_descanso, a = config.tiene_abandono;
     const cols = ['Hora actual'];
-    if (p) { cols.push('Próx. llegada A', 'Próx. llegada B'); }
-    else    { cols.push('Próx. llegada'); }
+    if (p) { cols.push('Próx. llegada A', 'Próx. llegada B'); } else { cols.push('Próx. llegada'); }
     cols.push('Próx. fin serv.');
     if (d) cols.push('Hora descanso', 'Hora trabajo');
-    if (a) {
-      if (p) cols.push('Abandono A', 'Abandono B');
-      else   cols.push('Hora abandono');
-    }
+    if (a) { if (p) cols.push('Abandono A', 'Abandono B'); else cols.push('Hora abandono'); }
     cols.push('PS');
-    if (p) cols.push('Cola A', 'Cola B');
-    else   cols.push('Cola');
+    if (p) cols.push('Cola A', 'Cola B'); else cols.push('Cola');
     if (d) cols.push('Servidor');
-    cols.push('Gráfico');  // Siempre presente al final
+    cols.push('Gráfico');
     return cols;
   }
 
   function buildRow(fila, config) {
     const p = config.tiene_prioridad, d = config.tiene_descanso, a = config.tiene_abandono;
     const cells = [];
-
     const cell = val => `<td>${val !== null && val !== '' ? val : '<span class="cell-empty">—</span>'}</td>`;
     const timeCell = val => `<td class="cell-time">${val ?? '<span class="cell-empty">—</span>'}</td>`;
     const boolCell = val => val
@@ -491,41 +319,62 @@
       : `<td><span class="badge badge-off">No</span></td>`;
 
     cells.push(timeCell(fila.tiempo_actual));
-
-    if (p) {
-      cells.push(cell(fila.proxima_llegada_a), cell(fila.proxima_llegada_b));
-    } else {
-      cells.push(cell(fila.proxima_llegada));
-    }
-
+    if (p) { cells.push(cell(fila.proxima_llegada_a), cell(fila.proxima_llegada_b)); }
+    else    { cells.push(cell(fila.proxima_llegada)); }
     cells.push(cell(fila.proximo_fin_servicio));
-
-    if (d) {
-      cells.push(cell(fila.proximo_descanso), cell(fila.proximo_trabajo));
-    }
-
-    if (a) {
-      if (p) cells.push(cell(fila.proximo_abandono_a), cell(fila.proximo_abandono_b));
-      else   cells.push(cell(fila.proximo_abandono));
-    }
-
+    if (d) cells.push(cell(fila.proximo_descanso), cell(fila.proximo_trabajo));
+    if (a) { if (p) cells.push(cell(fila.proximo_abandono_a), cell(fila.proximo_abandono_b)); else cells.push(cell(fila.proximo_abandono)); }
     cells.push(boolCell(fila.puesto_de_servicio));
-
     if (p) {
       cells.push(
         `<td><span class="badge badge-a">${fila.cola_a}</span></td>`,
         `<td><span class="badge badge-b">${fila.cola_b}</span></td>`
       );
-    } else {
-      cells.push(cell(fila.cola));
+    } else { cells.push(cell(fila.cola)); }
+    if (d) cells.push(boolCell(fila.servidor));
+    cells.push(`<td class="cell-grafico">${fila.grafico ?? ''}</td>`);
+    return `<tr>${cells.join('')}</tr>`;
+  }
+
+  function card(label, value, colorClass = '') {
+    return `
+      <div class="metrica-card">
+        <div class="label">${label}</div>
+        <div class="value ${colorClass}">${value}</div>
+      </div>`;
+  }
+
+  function renderMetricas(m, config) {
+    const p = config.tiene_prioridad, d = config.tiene_descanso, a = config.tiene_abandono;
+
+    let html = '<div class="metricas-grid">';
+    html += card('Clientes atendidos', m.clientes_atendidos, 'green');
+    if (a) html += card('Abandonaron la cola', m.clientes_abandonaron, 'red');
+    html += card('Espera promedio', m.espera_promedio + 's', 'amber');
+    html += card('Espera máxima', m.espera_maxima + 's', 'amber');
+    html += card('Ocupación del servidor', m.ocupacion_servidor + '%', m.ocupacion_servidor > 80 ? 'red' : 'green');
+    html += card('Tiempo PS ocupado', m.tiempo_servidor_ocupado + 's');
+    if (d) html += card('Tiempo servidor ausente', m.tiempo_servidor_ausente + 's', 'red');
+    html += '</div>';
+
+    if (p) {
+      html += `
+        <div class="metricas-seccion">
+          <div class="metricas-seccion-title">Desglose por tipo de cliente</div>
+          <div class="metricas-grid">
+            ${card('Atendidos A', m.clientes_atendidos_a, 'accent')}
+            ${card('Atendidos B', m.clientes_atendidos_b)}
+            ${a ? card('Abandonaron A', m.clientes_abandonaron_a, 'red') : ''}
+            ${a ? card('Abandonaron B', m.clientes_abandonaron_b, 'red') : ''}
+            ${card('Espera prom. A', m.espera_promedio_a + 's', 'amber')}
+            ${card('Espera prom. B', m.espera_promedio_b + 's', 'amber')}
+            ${card('Espera máx. A', m.espera_maxima_a + 's')}
+            ${card('Espera máx. B', m.espera_maxima_b + 's')}
+          </div>
+        </div>`;
     }
 
-    if (d) cells.push(boolCell(fila.servidor));
-
-    // Columna gráfico
-    cells.push(`<td class="cell-grafico">${fila.grafico ?? ''}</td>`);
-
-    return `<tr>${cells.join('')}</tr>`;
+    return html;
   }
 
   async function ejecutar() {
@@ -536,6 +385,8 @@
     const thead = document.getElementById('thead');
     const tabla = document.getElementById('tabla');
     const empty = document.getElementById('empty_state');
+    const metricasPanel = document.getElementById('metricas_panel');
+    const metricasContenido = document.getElementById('metricas_contenido');
 
     btn.disabled = true;
     status.textContent = 'Ejecutando...';
@@ -543,6 +394,7 @@
     tbody.innerHTML = '';
     empty.style.display = 'none';
     tabla.style.display = 'table';
+    metricasPanel.classList.remove('visible');
 
     try {
       const res = await fetch('/simular', {
@@ -561,11 +413,11 @@
         const tr = document.createElement('tbody');
         tr.innerHTML = buildRow(data.filas[i], data.config);
         tbody.appendChild(tr.firstElementChild);
-
-        if (i % 50 === 0) {
-          await new Promise(r => setTimeout(r, 0));
-        }
+        if (i % 50 === 0) await new Promise(r => setTimeout(r, 0));
       }
+
+      metricasContenido.innerHTML = renderMetricas(data.metricas, data.config);
+      metricasPanel.classList.add('visible');
 
       status.textContent = `${data.filas.length} eventos procesados`;
       status.className = 'done';

@@ -9,6 +9,7 @@ class TipoEvento(Enum):  # Enum para representar los tipos de eventos
     ABANDONO = 5
     LLEGADA_A = 6
     LLEGADA_B = 7
+    LLEGADA_AL_PS = 8
 
 
 class Evento:   # Clase para representar un evento en la simulación

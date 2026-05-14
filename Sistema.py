@@ -7,3 +7,4 @@ class Sistema:          # Clase para representar el sistema de colas
         self.servidor = True #false = servidor cerrado o no disponible, true = servidor abierto o presente
         self.tiempo_fin_servicio_actual = None # Variable para almacenar el tiempo de fin de servicio del cliente actual
         self.tiempo_restante_servicio_actual = None # Variable para almacenar el tiempo restante de servicio del cliente actual en caso de que el servidor salga durante su atención
+        self.zona_seguridad_ocupada = False #false = zona de seguridad desocupada, true = zona de seguridad ocupada

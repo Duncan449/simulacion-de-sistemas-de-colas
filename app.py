@@ -1,11 +1,27 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
+import json
 
 from Simulacion import Simulacion
 
 app = FastAPI()
+
+
+class VectorInicial(BaseModel):
+    ps_ocupado: bool = False
+    ps_tiempo_restante: Optional[int] = None
+    servidor_presente: bool = True
+    tiempo_regreso_servidor: Optional[int] = None
+    zona_ocupada: bool = False
+    tiempo_llegada_ps: Optional[int] = None
+    cola_cantidad: Optional[int] = None
+    cola_tiempos: Optional[List[int]] = None
+    cola_a_cantidad: Optional[int] = None
+    cola_a_tiempos: Optional[List[int]] = None
+    cola_b_cantidad: Optional[int] = None
+    cola_b_tiempos: Optional[List[int]] = None
 
 
 class ConfigRequest(BaseModel):
@@ -13,6 +29,7 @@ class ConfigRequest(BaseModel):
     tiene_prioridad: bool
     tiene_descanso: bool
     tiene_abandono: bool
+    tiene_zona_seguridad: bool
     llegada_min: Optional[int] = None
     llegada_max: Optional[int] = None
     llegada_a_min: Optional[int] = None
@@ -29,6 +46,9 @@ class ConfigRequest(BaseModel):
     abandono_a_max: Optional[int] = None
     abandono_b_min: Optional[int] = None
     abandono_b_max: Optional[int] = None
+    caminata_min: Optional[int] = None
+    caminata_max: Optional[int] = None
+    vector_inicial: Optional[VectorInicial] = None
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -68,6 +88,11 @@ async def simular(config_req: ConfigRequest):
         config["abandono_b_min"] = config["abandono_a_min"]
         config["abandono_b_max"] = config["abandono_a_max"]
 
+    # Si no hay zona de seguridad, los generadores de caminata deben tener valores válidos
+    if not config["tiene_zona_seguridad"]:
+        config["caminata_min"] = 0
+        config["caminata_max"] = 0
+
     sim = Simulacion(config["tiempo_total"], config)
     resultados = []
 
@@ -75,6 +100,7 @@ async def simular(config_req: ConfigRequest):
         tiene_prioridad = config["tiene_prioridad"]
         tiene_descanso = config["tiene_descanso"]
         tiene_abandono = config["tiene_abandono"]
+        tiene_zona = config["tiene_zona_seguridad"]
 
         # Representación gráfica del estado del sistema
         grafico = "⧇" if sim.sistema.puesto_de_servicio else "▢"
@@ -82,6 +108,8 @@ async def simular(config_req: ConfigRequest):
             grafico += "D" if sim.sistema.servidor else " "
         else:
             grafico += "D"
+        if tiene_zona:
+            grafico += "Z" if sim.sistema.zona_seguridad_ocupada else " "
         if tiene_prioridad:
             grafico += "A" * len(sim.sistema.cola_A) + "B" * len(sim.sistema.cola_B)
         else:
@@ -97,6 +125,9 @@ async def simular(config_req: ConfigRequest):
             ),
             "proxima_llegada_b": (
                 sim.obtener_proxima_llegada_b() if tiene_prioridad else None
+            ),
+            "proxima_llegada_al_ps": (
+                sim.obtener_proxima_llegada_al_ps() if tiene_zona else None
             ),
             "proximo_fin_servicio": sim.obtener_proximo_fin_servicio(),
             "proximo_descanso": (
@@ -121,6 +152,9 @@ async def simular(config_req: ConfigRequest):
                 else None
             ),
             "puesto_de_servicio": sim.sistema.puesto_de_servicio,
+            "zona_seguridad": (
+                sim.sistema.zona_seguridad_ocupada if tiene_zona else None
+            ),
             "cola": len(sim.sistema.cola) if not tiene_prioridad else None,
             "cola_a": len(sim.sistema.cola_A) if tiene_prioridad else None,
             "cola_b": len(sim.sistema.cola_B) if tiene_prioridad else None,
@@ -135,7 +169,6 @@ async def simular(config_req: ConfigRequest):
     sim.inicio()
     sim.ejecutar()
 
-    # Obtener métricas finales de la simulación
     metricas = sim.obtener_metricas()
 
     return {"config": config, "filas": resultados, "metricas": metricas}

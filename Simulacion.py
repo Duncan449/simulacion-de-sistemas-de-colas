@@ -32,7 +32,6 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
         self.cliente_actual = None  # Variable para almacenar el cliente que está siendo atendido actualmente (si hay alguno)
         self.cantidad_descansos = 0  # Contador de la cantidad de veces que el servidor descansó
         self.clientes_atendidos_hasta_segundo_descanso = 0  # Contador de clientes atendidos hasta el segundo descanso del servidor 
-        self.modo_carpintero = False  # Modo especial para generar tiempos de servicio más largos y variados, útil para probar la lógica de descanso del servidor
 
         # Aplicar vector inicial
         self._aplicar_vector_inicial()
@@ -48,7 +47,7 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
         tiene_zona = self.config["tiene_zona_seguridad"]
         tiene_abandono = self.config["tiene_abandono"]
 
-        # ── Estado del servidor inicial
+        #Estado del servidor inicial
         if tiene_descanso:
             servidor_presente = vi.get("servidor_presente", True) 
             self.sistema.servidor = servidor_presente
@@ -63,17 +62,14 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                     self.contador_eventos += 1
                 self._tiempo_inicio_ausencia = 0  # Empezó ausente desde t=0
 
-        # ── Cola inicial
-        # Los clientes se agregan a la cola con hora_llegada negativa para que
-        # su tiempo de espera impacte correctamente en el promedio.
-        # Si abandono está activo, se programa el evento de abandono de cada uno
-        # considerando que llevan 'espera' segundos esperando, por lo que su
-        # tiempo restante de paciencia es (paciencia_total - espera_ya_transcurrida).
+        # Cola inicial
+        # Los clientes se agregan a la cola con hora_llegada negativa para que su tiempo de espera impacte correctamente en el promedio.
+        # Si abandono está activo, se programa el evento de abandono de cada uno. Considerando que llevan 'espera' segundos esperando, su tiempo restante de paciencia es (paciencia_total - espera_ya_transcurrida).
         if tiene_prioridad:
             cantidad_a = vi.get("cola_a_cantidad", 0) or 0
-            tiempos_a = vi.get("cola_a_tiempos", []) or []
+            tiempos_a = vi.get("cola_a_tiempos", []) or [] 
             for i in range(cantidad_a):
-                espera = tiempos_a[i] if i < len(tiempos_a) else 0
+                espera = tiempos_a[i] if i < len(tiempos_a) else 0 
                 hora_llegada = -espera
                 cliente = Cliente(self.contador_clientes, hora_llegada, "A")
                 self.sistema.cola_A.append(cliente)
@@ -144,7 +140,7 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                         ),
                     )
                     self.contador_eventos += 1
-        # ── Zona de seguridad inicial
+        # Zona de seguridad inicial
         if tiene_zona:
             zona_ocupada = vi.get("zona_ocupada", False) 
             if zona_ocupada:
@@ -167,8 +163,8 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                     )
                     self.contador_eventos += 1
 
-        # ── Estado del PS inicial
-        ps_ocupado = vi.get("ps_ocupado", False)
+        # Estado del PS inicial
+        ps_ocupado = vi.get("ps_ocupado", False) 
         if ps_ocupado:
             self.sistema.puesto_de_servicio = True
             tiempo_restante = vi.get("ps_tiempo_restante", 0) or 0
@@ -184,14 +180,13 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                 self.contador_eventos += 1
                 self._tiempo_inicio_servicio = 0  # Empezó a ser atendido en t=0
 
-        # ── Si el PS arranca libre, servidor presente y hay cola: arrancar servicio ──
-        # Esto evita que el primer evento de llegada "robe" el lugar del primero en cola
+        # Si el PS arranca libre, el sv está presente y hay cola, arrancamos antendiendo al primer cliente en la cola (o lo mandamos a la zona de seguridad)
         elif (
             not self.sistema.puesto_de_servicio
             and self.sistema.servidor
             and self._cola_tiene_clientes()
         ):
-            cliente_atendido, _ = self._sacar_siguiente_de_cola()
+            cliente_atendido, _ = self._sacar_siguiente_de_cola() 
             self.cliente_actual = cliente_atendido
             tiempo_espera = (
                 0 - cliente_atendido.hora_llegada
@@ -203,12 +198,12 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                 self._enviar_cliente_a_zona(cliente_atendido)
             else:
                 self._iniciar_servicio_en_ps()
-    # Generadores de tiempo
 
+    # Generadores de tiempo
     def generar_tiempo_llegada(self):
         minimo = self.config["llegada_min"]
         maximo = self.config["llegada_max"]
-        return random.randint(minimo, maximo) if minimo != maximo else minimo
+        return random.randint(minimo, maximo) if minimo != maximo else minimo 
 
     def generar_tiempo_llegada_a(self):
         minimo = self.config["llegada_a_min"]
@@ -223,10 +218,6 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
     def generar_tiempo_servicio(self):
         minimo = self.config["servicio_min"]
         maximo = self.config["servicio_max"]
-
-        if self.modo_carpintero:
-            return random.randint(1800, 2400) + random.randint(600, 1200) + random.randint(5, 1800)
-
         return random.randint(minimo, maximo) if minimo != maximo else minimo
 
     def generar_tiempo_salida_servidor(self):
@@ -269,7 +260,6 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
         return random.randint(minimo, maximo) if minimo != maximo else minimo
 
     #  Métodos de obtención de próximos eventos
-
     def obtener_proxima_llegada(self):
         for evento in self.eventos:
             if evento[2].tipo == TipoEvento.LLEGADA:
@@ -294,7 +284,7 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
             if evento[2].tipo == TipoEvento.FIN_SERVICIO and evento[2].valido:
                 return evento[0]
 
-        # Si no hay evento válido, pero el servidor está ausente y el PS ocupado. Entonces proyectamos el fin de servicio para la tabla, para que el usuario tenga una referencia de cuándo podría terminar el servicio del cliente actual si el servidor regresa pronto. (Es sólo estético, no afecta la lógica de la simulación)
+        # Si no hay evento válido, pero el servidor está ausente y el PS ocupado. Entonces proyectamos el fin de servicio para la tabla, para que el usuario tenga una referencia de cuándo podría terminar el servicio del cliente actual si el servidor regresa pronto.
         if not self.sistema.servidor and self.sistema.puesto_de_servicio:
             hora_regreso_sv = self.obtener_proximo_trabajo()
             tiempo_restante = self.sistema.tiempo_restante_servicio_actual
@@ -403,9 +393,9 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                 and self.eventos[i][2].id_cliente == id_cliente
             ):
                 self.eventos[i][2].valido = False
-                break               
-    # Procesadores de eventos
+                break      
 
+    # Procesadores de eventos
     def procesar_llegada_al_ps(self, evento):
         # El cliente termina de caminar por la zona de seguridad y llega al PS.
         self.sistema.zona_seguridad_ocupada = (
@@ -858,26 +848,21 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
     def inicio(self):
         tiene_prioridad = self.config["tiene_prioridad"]
         tiene_descanso = self.config["tiene_descanso"]
+        vi = self.config.get("vector_inicial", {}) or {}
 
         # Generar el primer evento de llegada según configuración
         if tiene_prioridad:
-            tiempo_a = (
-                self.generar_tiempo_llegada_a()
-            )  # Generar el tiempo de llegada del primer cliente tipo A
+            tiempo_a = vi.get("primera_llegada_a") or self.generar_tiempo_llegada_a() # Generar el tiempo de llegada del primer cliente tipo A
             evento_a = Evento(TipoEvento.LLEGADA_A, tiempo_a)
             heapq.heappush(self.eventos, (tiempo_a, self.contador_eventos, evento_a))
             self.contador_eventos += 1
 
-            tiempo_b = (
-                self.generar_tiempo_llegada_b()
-            )  # Generar el tiempo de llegada del primer cliente tipo B
+            tiempo_b = vi.get("primera_llegada_b") or self.generar_tiempo_llegada_b() # Generar el tiempo de llegada del primer cliente tipo B
             evento_b = Evento(TipoEvento.LLEGADA_B, tiempo_b)
             heapq.heappush(self.eventos, (tiempo_b, self.contador_eventos, evento_b))
             self.contador_eventos += 1
         else:
-            tiempo = (
-                self.generar_tiempo_llegada()
-            )  # Generar el tiempo de llegada del primer cliente
+            tiempo = vi.get("primera_llegada") or self.generar_tiempo_llegada() # Generar el tiempo de llegada del primer cliente 
             evento = Evento(TipoEvento.LLEGADA, tiempo)
             heapq.heappush(self.eventos, (tiempo, self.contador_eventos, evento))
             self.contador_eventos += 1
@@ -885,9 +870,7 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
         # Generar el primer evento de salida del servidor (si el servidor puede descansar)
         if tiene_descanso and self.sistema.servidor:  # Solo programamos la salida del servidor si el servidor está presente al inicio
             tiempo_salida_servidor = self.generar_tiempo_salida_servidor()
-            evento_salida_servidor = Evento(
-                TipoEvento.SALIDA_SERVIDOR, tiempo_salida_servidor
-            )
+            evento_salida_servidor = Evento(TipoEvento.SALIDA_SERVIDOR, tiempo_salida_servidor)
             heapq.heappush(
                 self.eventos,
                 (tiempo_salida_servidor, self.contador_eventos, evento_salida_servidor),
@@ -896,6 +879,8 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
 
         # Imprimir encabezados de la tabla según configuración
         self._imprimir_encabezado()
+        self._imprimir_fila()   # Para imprimir el vector inicial t=0
+
 
     def _imprimir_encabezado(self):
         tiene_prioridad = self.config["tiene_prioridad"]

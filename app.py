@@ -2,13 +2,12 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import Optional, List
-import json
 
 from Simulacion import Simulacion
 
 app = FastAPI()
 
-
+# Modelo compartido
 class VectorInicial(BaseModel):
     ps_ocupado: bool = False
     ps_tiempo_restante: Optional[int] = None
@@ -22,8 +21,11 @@ class VectorInicial(BaseModel):
     cola_a_tiempos: Optional[List[int]] = None
     cola_b_cantidad: Optional[int] = None
     cola_b_tiempos: Optional[List[int]] = None
-
-
+    primera_llegada: Optional[int] = None  
+    primera_llegada_a: Optional[int] = None  
+    primera_llegada_b: Optional[int] = None  
+    
+# Modelo modo un servidor
 class ConfigRequest(BaseModel):
     tiempo_total: int
     tiene_prioridad: bool
@@ -51,17 +53,42 @@ class ConfigRequest(BaseModel):
     vector_inicial: Optional[VectorInicial] = None
 
 
-@app.get("/", response_class=HTMLResponse)
-async def index():
-    with open("index.html", "r", encoding="utf-8") as f:
-        return f.read()
+# Modelo modo multi-subsistemas 
+class SubsistemaConfig(BaseModel):
+    nombre: str = "Subsistema"
+    tiene_prioridad: bool = False
+    tiene_descanso: bool = False
+    tiene_abandono: bool = False
+    tiene_zona_seguridad: bool = False
+    llegada_min: Optional[int] = None
+    llegada_max: Optional[int] = None
+    llegada_a_min: Optional[int] = None
+    llegada_a_max: Optional[int] = None
+    llegada_b_min: Optional[int] = None
+    llegada_b_max: Optional[int] = None
+    servicio_min: int = 1
+    servicio_max: int = 1
+    salida_min: Optional[int] = None
+    salida_max: Optional[int] = None
+    descanso_min: Optional[int] = None
+    descanso_max: Optional[int] = None
+    abandono_a_min: Optional[int] = None
+    abandono_a_max: Optional[int] = None
+    abandono_b_min: Optional[int] = None
+    abandono_b_max: Optional[int] = None
+    caminata_min: Optional[int] = None
+    caminata_max: Optional[int] = None
+    vector_inicial: Optional[VectorInicial] = None
 
 
-@app.post("/simular")
-async def simular(config_req: ConfigRequest):
-    config = config_req.model_dump()
+class MultiConfigRequest(BaseModel):
+    tiempo_total: int
+    subsistemas: List[SubsistemaConfig]
 
-    # Si no hay prioridad, los generadores A/B deben tener valores válidos
+
+# Helpers
+def normalizar_config(config: dict) -> dict:
+    #Completa los valores faltantes del config para que los generadores no fallen.
     if not config["tiene_prioridad"]:
         config["llegada_a_min"] = config["llegada_min"]
         config["llegada_a_max"] = config["llegada_max"]
@@ -71,14 +98,12 @@ async def simular(config_req: ConfigRequest):
         config["llegada_min"] = config["llegada_a_min"]
         config["llegada_max"] = config["llegada_a_max"]
 
-    # Si no hay descanso, los generadores de descanso deben tener valores válidos
     if not config["tiene_descanso"]:
         config["salida_min"] = 1
         config["salida_max"] = 1
         config["descanso_min"] = 1
         config["descanso_max"] = 1
 
-    # Si no hay abandono, los generadores de abandono deben tener valores válidos
     if not config["tiene_abandono"]:
         config["abandono_a_min"] = 1
         config["abandono_a_max"] = 1
@@ -88,11 +113,18 @@ async def simular(config_req: ConfigRequest):
         config["abandono_b_min"] = config["abandono_a_min"]
         config["abandono_b_max"] = config["abandono_a_max"]
 
-    # Si no hay zona de seguridad, los generadores de caminata deben tener valores válidos
-    if not config["tiene_zona_seguridad"]:
+    if not config.get("tiene_zona_seguridad", False):
         config["caminata_min"] = 0
         config["caminata_max"] = 0
 
+    if config.get("vector_inicial") is None:
+        config["vector_inicial"] = {}
+
+    return config
+
+
+def ejecutar_simulacion(config: dict) -> dict:
+    #Crea y ejecuta una simulación, capturando filas y métricas.
     sim = Simulacion(config["tiempo_total"], config)
     resultados = []
 
@@ -102,7 +134,6 @@ async def simular(config_req: ConfigRequest):
         tiene_abandono = config["tiene_abandono"]
         tiene_zona = config["tiene_zona_seguridad"]
 
-        # Representación gráfica del estado del sistema
         grafico = "⧇" if sim.sistema.puesto_de_servicio else "▢"
         if tiene_descanso:
             grafico += "D" if sim.sistema.servidor else " "
@@ -165,10 +196,34 @@ async def simular(config_req: ConfigRequest):
 
     sim._imprimir_fila = capturar_fila
     sim._imprimir_encabezado = lambda: None
-
     sim.inicio()
     sim.ejecutar()
 
-    metricas = sim.obtener_metricas()
+    return {"config": config, "filas": resultados, "metricas": sim.obtener_metricas()}
 
-    return {"config": config, "filas": resultados, "metricas": metricas}
+
+# Endpoints
+@app.get("/", response_class=HTMLResponse)
+async def index():
+    with open("index.html", "r", encoding="utf-8") as f:
+        return f.read()
+
+
+@app.post("/simular")
+async def simular(config_req: ConfigRequest):
+    config = config_req.model_dump()
+    config = normalizar_config(config)
+    return ejecutar_simulacion(config)
+
+
+@app.post("/simular_multi")
+async def simular_multi(req: MultiConfigRequest):
+    resultados = []
+    for sub in req.subsistemas:
+        config = sub.model_dump()
+        config["tiempo_total"] = req.tiempo_total
+        config = normalizar_config(config)
+        resultado = ejecutar_simulacion(config)
+        resultado["nombre"] = sub.nombre
+        resultados.append(resultado)
+    return {"tiempo_total": req.tiempo_total, "subsistemas": resultados}

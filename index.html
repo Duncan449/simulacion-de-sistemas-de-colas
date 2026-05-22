@@ -7,16 +7,13 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --bg: #0d0f14; --surface: #151820; --surface2: #1c2030; --border: #2a3045;
       --accent: #4f8ef7; --accent2: #7c3aed; --green: #34d399; --amber: #fbbf24;
       --red: #f87171; --text: #e2e8f0; --muted: #64748b;
       --mono: 'JetBrains Mono', monospace; --sans: 'Syne', sans-serif;
     }
-
     body { background: var(--bg); color: var(--text); font-family: var(--mono); min-height: 100vh; padding: 2rem; }
-
     header { margin-bottom: 2.5rem; }
     header h1 {
       font-family: var(--sans); font-size: 2rem; font-weight: 800; letter-spacing: -0.03em;
@@ -24,12 +21,9 @@
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     header p { color: var(--muted); font-size: 0.8rem; margin-top: 0.3rem; }
-
     .layout { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; align-items: start; }
-
     .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; position: sticky; top: 2rem; max-height: 95vh; overflow-y: auto; }
     .panel h2 { font-family: var(--sans); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1.2rem; }
-
     .field { margin-bottom: 1rem; }
     .field label { display: block; font-size: 0.72rem; color: var(--muted); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.06em; }
     .field input[type="number"], .field input[type="text"] {
@@ -39,42 +33,42 @@
     }
     .field input:focus { border-color: var(--accent); }
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-
     .toggle-group { display: flex; gap: 0.4rem; margin-bottom: 1rem; }
     .toggle-btn { flex: 1; padding: 0.45rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-family: var(--mono); font-size: 0.75rem; cursor: pointer; transition: all 0.15s; text-align: center; }
     .toggle-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
     .section-title { font-size: 0.72rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin: 1.2rem 0 0.7rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
-
     .conditional { display: none; }
     .conditional.visible { display: block; }
 
+    /* ── Modo toggle ── */
+    .mode-toggle { display: flex; gap: 0; margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .mode-btn { flex: 1; padding: 0.6rem; background: var(--surface2); border: none; color: var(--muted); font-family: var(--mono); font-size: 0.75rem; cursor: pointer; transition: all 0.15s; text-align: center; }
+    .mode-btn.active { background: var(--accent); color: #fff; }
+    .mode-btn:first-child { border-right: 1px solid var(--border); }
+
+    /* ── Multi-subsistema ── */
+    .sub-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 0.8rem; }
+    .sub-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.8rem; cursor: pointer; }
+    .sub-card-title { font-size: 0.8rem; font-weight: 700; color: var(--text); }
+    .sub-card-arrow { font-size: 0.65rem; color: var(--muted); transition: transform 0.2s; }
+    .sub-card.open .sub-card-arrow { transform: rotate(180deg); }
+    .sub-card-body { display: none; }
+    .sub-card.open .sub-card-body { display: block; }
+    .sub-inner-title { font-size: 0.65rem; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.08em; margin: 0.8rem 0 0.4rem; }
+    .btn-add-sub { width: 100%; padding: 0.5rem; background: transparent; border: 1px dashed var(--border); border-radius: 8px; color: var(--muted); font-family: var(--mono); font-size: 0.75rem; cursor: pointer; transition: all 0.15s; margin-bottom: 0.8rem; }
+    .btn-add-sub:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-remove-sub { padding: 0.2rem 0.5rem; background: transparent; border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-size: 0.65rem; cursor: pointer; transition: all 0.15s; }
+    .btn-remove-sub:hover { border-color: var(--red); color: var(--red); }
+
     /* ── Vector inicial colapsable ── */
-    .vi-toggle-btn {
-      width: 100%; margin-top: 1.2rem; padding: 0.6rem 0.8rem;
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--muted); font-family: var(--mono);
-      font-size: 0.78rem; cursor: pointer; transition: all 0.15s;
-      display: flex; align-items: center; justify-content: space-between;
-      text-align: left;
-    }
+    .vi-toggle-btn { width: 100%; margin-top: 1.2rem; padding: 0.6rem 0.8rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-family: var(--mono); font-size: 0.78rem; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: space-between; }
     .vi-toggle-btn:hover { border-color: var(--accent); color: var(--text); }
-    .vi-toggle-btn .arrow { transition: transform 0.2s; font-size: 0.65rem; }
-    .vi-toggle-btn.open .arrow { transform: rotate(180deg); }
-
-    .vi-panel {
-      display: none; margin-top: 0.5rem;
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 8px; padding: 1rem;
-    }
+    .vi-panel { display: none; margin-top: 0.5rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
     .vi-panel.visible { display: block; }
-
     .vi-subsection { margin-bottom: 0.8rem; }
     .vi-subsection-title { font-size: 0.65rem; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
-
     .hint { font-size: 0.65rem; color: var(--muted); margin-top: 0.25rem; }
 
-    /* ── Botón ejecutar ── */
     .btn-run { width: 100%; margin-top: 1.2rem; padding: 0.75rem; background: var(--accent); border: none; border-radius: 8px; color: #fff; font-family: var(--sans); font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s, transform 0.1s; }
     .btn-run:hover { opacity: 0.88; }
     .btn-run:active { transform: scale(0.98); }
@@ -95,6 +89,15 @@
     .metricas-seccion { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
     .metricas-seccion-title { font-size: 0.68rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.7rem; }
 
+    /* ── Tabs ── */
+    .tabs-wrap { margin-bottom: 0; }
+    .tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; padding: 1rem 1rem 0; border-bottom: 1px solid var(--border); }
+    .tab-btn { padding: 0.45rem 1rem; background: transparent; border: 1px solid transparent; border-bottom: none; border-radius: 6px 6px 0 0; color: var(--muted); font-family: var(--mono); font-size: 0.75rem; cursor: pointer; transition: all 0.15s; position: relative; bottom: -1px; }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { background: var(--surface); border-color: var(--border); border-bottom-color: var(--surface); color: var(--accent); font-weight: 700; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
     /* ── Tabla ── */
     .results { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
     .results-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
@@ -102,10 +105,10 @@
     #status { font-size: 0.72rem; color: var(--muted); }
     #status.running { color: var(--amber); }
     #status.done { color: var(--green); }
-    .table-wrap { overflow-x: auto; max-height: 60vh; overflow-y: auto; }
+    .table-wrap { overflow-x: auto; max-height: 55vh; overflow-y: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 0.78rem; white-space: nowrap; }
     thead th { background: var(--surface2); color: var(--muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.6rem 1rem; text-align: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1; }
-    tbody tr { border-bottom: 1px solid var(--border); animation: fadeIn 0.2s ease; }
+    tbody tr { border-bottom: 1px solid var(--border); }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: var(--surface2); }
     tbody td { padding: 0.5rem 1rem; text-align: center; color: var(--text); }
@@ -119,8 +122,6 @@
     .cell-grafico { font-size: 1rem; letter-spacing: 0.05em; text-align: left; }
     .empty-state { padding: 4rem 2rem; text-align: center; color: var(--muted); font-size: 0.85rem; }
     .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.8rem; display: block; opacity: 0.4; }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
     @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .panel { position: static; } }
   </style>
 </head>
@@ -132,492 +133,830 @@
 </header>
 
 <div class="layout">
-
   <aside class="panel">
     <h2>Configuración</h2>
 
+    <!-- Modo de simulación -->
+    <div class="mode-toggle">
+      <button class="mode-btn active" onclick="setModo('simple', this)">Un servidor</button>
+      <button class="mode-btn" onclick="setModo('multi', this)">Múltiples subsistemas</button>
+    </div>
+
+    <!-- Tiempo total (compartido) -->
     <div class="field">
       <label>Tiempo total (segundos)</label>
       <input type="number" id="tiempo_total" value="28800" min="1"/>
     </div>
 
-    <div class="section-title">Tipos de clientes</div>
-    <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Prioridad A/B</label>
-    <div class="toggle-group" style="margin-top:0.3rem;">
-      <button class="toggle-btn active" onclick="setToggle('prioridad', false, this)">Sin prioridad</button>
-      <button class="toggle-btn" onclick="setToggle('prioridad', true, this)">Con prioridad</button>
-    </div>
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- MODO SIMPLE                                           -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div id="modo_simple">
 
-    <div id="bloque_sin_prioridad" class="conditional visible">
-      <div class="section-title">Llegada de clientes</div>
-      <div class="field-row">
-        <div class="field"><label>Mín</label><input type="number" id="llegada_min" value="40" min="1"/></div>
-        <div class="field"><label>Máx</label><input type="number" id="llegada_max" value="60" min="1"/></div>
+      <div class="section-title">Tipos de clientes</div>
+      <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Prioridad A/B</label>
+      <div class="toggle-group" style="margin-top:0.3rem;">
+        <button class="toggle-btn active" onclick="setToggle('prioridad', false, this)">Sin prioridad</button>
+        <button class="toggle-btn" onclick="setToggle('prioridad', true, this)">Con prioridad</button>
       </div>
-    </div>
 
-    <div id="bloque_con_prioridad" class="conditional">
-      <div class="section-title">Llegada tipo A</div>
-      <div class="field-row">
-        <div class="field"><label>Mín</label><input type="number" id="llegada_a_min" value="80" min="1"/></div>
-        <div class="field"><label>Máx</label><input type="number" id="llegada_a_max" value="120" min="1"/></div>
-      </div>
-      <div class="section-title">Llegada tipo B</div>
-      <div class="field-row">
-        <div class="field"><label>Mín</label><input type="number" id="llegada_b_min" value="40" min="1"/></div>
-        <div class="field"><label>Máx</label><input type="number" id="llegada_b_max" value="60" min="1"/></div>
-      </div>
-    </div>
-
-    <div class="section-title">Servicio</div>
-    <div class="field-row">
-      <div class="field"><label>Mín</label><input type="number" id="servicio_min" value="45" min="1"/></div>
-      <div class="field"><label>Máx</label><input type="number" id="servicio_max" value="50" min="1"/></div>
-    </div>
-
-    <div class="section-title">Descanso del servidor</div>
-    <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">¿El servidor se ausenta?</label>
-    <div class="toggle-group" style="margin-top:0.3rem;">
-      <button class="toggle-btn active" onclick="setToggle('descanso', false, this)">No</button>
-      <button class="toggle-btn" onclick="setToggle('descanso', true, this)">Sí</button>
-    </div>
-    <div id="bloque_descanso" class="conditional">
-      <div class="section-title">Tiempo hasta ausencia</div>
-      <div class="field-row">
-        <div class="field"><label>Mín</label><input type="number" id="salida_min" value="55" min="1"/></div>
-        <div class="field"><label>Máx</label><input type="number" id="salida_max" value="65" min="1"/></div>
-      </div>
-      <div class="section-title">Duración del descanso</div>
-      <div class="field-row">
-        <div class="field"><label>Mín</label><input type="number" id="descanso_min" value="25" min="1"/></div>
-        <div class="field"><label>Máx</label><input type="number" id="descanso_max" value="35" min="1"/></div>
-      </div>
-    </div>
-
-    <div class="section-title">Abandono</div>
-    <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">¿Clientes abandonan la cola?</label>
-    <div class="toggle-group" style="margin-top:0.3rem;">
-      <button class="toggle-btn active" onclick="setToggle('abandono', false, this)">No</button>
-      <button class="toggle-btn" onclick="setToggle('abandono', true, this)">Sí</button>
-    </div>
-    <div id="bloque_abandono" class="conditional">
-      <div id="bloque_abandono_general" class="conditional visible">
-        <div class="section-title">Paciencia del cliente</div>
+      <div id="bloque_sin_prioridad" class="conditional visible">
+        <div class="section-title">Llegada de clientes</div>
         <div class="field-row">
-          <div class="field"><label>Mín</label><input type="number" id="abandono_a_min" value="60" min="1"/></div>
-          <div class="field"><label>Máx</label><input type="number" id="abandono_a_max" value="120" min="1"/></div>
+          <div class="field"><label>Mín</label><input type="number" id="llegada_min" value="40" min="1"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="llegada_max" value="60" min="1"/></div>
         </div>
       </div>
-      <div id="bloque_abandono_prioridad" class="conditional">
-        <div class="section-title">Paciencia tipo A</div>
-        <div class="field-row">
-          <div class="field"><label>Mín</label><input type="number" id="abandono_a_min_p" value="90" min="1"/></div>
-          <div class="field"><label>Máx</label><input type="number" id="abandono_a_max_p" value="120" min="1"/></div>
-        </div>
-        <div class="section-title">Paciencia tipo B</div>
-        <div class="field-row">
-          <div class="field"><label>Mín</label><input type="number" id="abandono_b_min" value="60" min="1"/></div>
-          <div class="field"><label>Máx</label><input type="number" id="abandono_b_max" value="90" min="1"/></div>
-        </div>
-      </div>
-    </div>
 
-    <div class="section-title">Zona de seguridad</div>
-    <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">¿Hay zona de seguridad entre la cola y el PS?</label>
-    <div class="toggle-group" style="margin-top:0.3rem;">
-      <button class="toggle-btn active" onclick="setToggle('zona', false, this)">No</button>
-      <button class="toggle-btn" onclick="setToggle('zona', true, this)">Sí</button>
-    </div>
-    <div id="bloque_zona" class="conditional">
-      <div class="section-title">Tiempo de caminata</div>
+      <div id="bloque_con_prioridad" class="conditional">
+        <div class="section-title">Llegada tipo A</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="llegada_a_min" value="80" min="1"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="llegada_a_max" value="120" min="1"/></div>
+        </div>
+        <div class="section-title">Llegada tipo B</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="llegada_b_min" value="40" min="1"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="llegada_b_max" value="60" min="1"/></div>
+        </div>
+      </div>
+
+      <div class="section-title">Servicio</div>
       <div class="field-row">
-        <div class="field"><label>Mín</label><input type="number" id="caminata_min" value="5" min="0"/></div>
-        <div class="field"><label>Máx</label><input type="number" id="caminata_max" value="15" min="0"/></div>
+        <div class="field"><label>Mín</label><input type="number" id="servicio_min" value="45" min="1"/></div>
+        <div class="field"><label>Máx</label><input type="number" id="servicio_max" value="50" min="1"/></div>
       </div>
-    </div>
 
-    <!-- ── Vector inicial colapsable ── -->
-    <button class="vi-toggle-btn" id="vi_toggle_btn" onclick="toggleVectorInicial()">
-      <span>▸ Estado inicial del sistema</span>
-      <span class="arrow">▾</span>
-    </button>
-
-    <div class="vi-panel" id="vi_panel">
-
-      <!-- PS -->
-      <div class="vi-subsection">
-        <div class="vi-subsection-title">Puesto de servicio</div>
-        <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Estado inicial</label>
-        <div class="toggle-group" style="margin-top:0.3rem;">
-          <button class="toggle-btn active" onclick="setToggle('vi_ps', false, this)">Libre</button>
-          <button class="toggle-btn" onclick="setToggle('vi_ps', true, this)">Ocupado</button>
+      <div class="section-title">Descanso del servidor</div>
+      <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">¿El servidor se ausenta?</label>
+      <div class="toggle-group" style="margin-top:0.3rem;">
+        <button class="toggle-btn active" onclick="setToggle('descanso', false, this)">No</button>
+        <button class="toggle-btn" onclick="setToggle('descanso', true, this)">Sí</button>
+      </div>
+      <div id="bloque_descanso" class="conditional">
+        <div class="section-title">Tiempo hasta ausencia</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="salida_min" value="55" min="1"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="salida_max" value="65" min="1"/></div>
         </div>
-        <div id="bloque_vi_ps" class="conditional">
-          <div class="field">
-            <label>Tiempo restante de servicio (seg)</label>
-            <input type="number" id="vi_ps_tiempo" value="30" min="1"/>
+        <div class="section-title">Duración del descanso</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="descanso_min" value="25" min="1"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="descanso_max" value="35" min="1"/></div>
+        </div>
+      </div>
+
+      <div class="section-title">Abandono</div>
+      <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">¿Clientes abandonan la cola?</label>
+      <div class="toggle-group" style="margin-top:0.3rem;">
+        <button class="toggle-btn active" onclick="setToggle('abandono', false, this)">No</button>
+        <button class="toggle-btn" onclick="setToggle('abandono', true, this)">Sí</button>
+      </div>
+      <div id="bloque_abandono" class="conditional">
+        <div id="bloque_abandono_general" class="conditional visible">
+          <div class="section-title">Paciencia del cliente</div>
+          <div class="field-row">
+            <div class="field"><label>Mín</label><input type="number" id="abandono_a_min" value="60" min="1"/></div>
+            <div class="field"><label>Máx</label><input type="number" id="abandono_a_max" value="120" min="1"/></div>
+          </div>
+        </div>
+        <div id="bloque_abandono_prioridad" class="conditional">
+          <div class="section-title">Paciencia tipo A</div>
+          <div class="field-row">
+            <div class="field"><label>Mín</label><input type="number" id="abandono_a_min_p" value="90" min="1"/></div>
+            <div class="field"><label>Máx</label><input type="number" id="abandono_a_max_p" value="120" min="1"/></div>
+          </div>
+          <div class="section-title">Paciencia tipo B</div>
+          <div class="field-row">
+            <div class="field"><label>Mín</label><input type="number" id="abandono_b_min" value="60" min="1"/></div>
+            <div class="field"><label>Máx</label><input type="number" id="abandono_b_max" value="90" min="1"/></div>
           </div>
         </div>
       </div>
 
-      <!-- Servidor -->
-      <div class="vi-subsection" id="bloque_vi_servidor_wrap">
-        <div class="vi-subsection-title">Servidor</div>
-        <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Estado inicial</label>
-        <div class="toggle-group" style="margin-top:0.3rem;">
-          <button class="toggle-btn active" onclick="setToggle('vi_servidor', true, this)">Presente</button>
-          <button class="toggle-btn" onclick="setToggle('vi_servidor', false, this)">Ausente</button>
+      <div class="section-title">Zona de seguridad</div>
+      <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">¿Hay zona de seguridad?</label>
+      <div class="toggle-group" style="margin-top:0.3rem;">
+        <button class="toggle-btn active" onclick="setToggle('zona', false, this)">No</button>
+        <button class="toggle-btn" onclick="setToggle('zona', true, this)">Sí</button>
+      </div>
+      <div id="bloque_zona" class="conditional">
+        <div class="section-title">Tiempo de caminata</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="caminata_min" value="5" min="0"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="caminata_max" value="15" min="0"/></div>
         </div>
-        <div id="bloque_vi_ausente" class="conditional">
-          <div class="field">
-            <label>Tiempo hasta que regresa (seg)</label>
-            <input type="number" id="vi_regreso" value="20" min="1"/>
+      </div>
+
+      <button class="vi-toggle-btn" id="vi_toggle_btn" onclick="toggleVI('vi_panel', 'vi_toggle_btn')">
+        <span>▸ Estado inicial del sistema</span><span>▾</span>
+      </button>
+      <div class="vi-panel" id="vi_panel">
+        <div class="vi-subsection">
+          <div class="vi-subsection-title">Puesto de servicio</div>
+          <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Estado inicial</label>
+          <div class="toggle-group" style="margin-top:0.3rem;">
+            <button class="toggle-btn active" onclick="setToggle('vi_ps', false, this)">Libre</button>
+            <button class="toggle-btn" onclick="setToggle('vi_ps', true, this)">Ocupado</button>
+          </div>
+          <div id="bloque_vi_ps" class="conditional">
+            <div class="field"><label>Tiempo restante (seg)</label><input type="number" id="vi_ps_tiempo" value="30" min="1"/></div>
           </div>
         </div>
-      </div>
-
-      <!-- Zona de seguridad -->
-      <div class="vi-subsection" id="bloque_vi_zona_wrap" style="display:none;">
-        <div class="vi-subsection-title">Zona de seguridad</div>
-        <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Estado inicial</label>
-        <div class="toggle-group" style="margin-top:0.3rem;">
-          <button class="toggle-btn active" onclick="setToggle('vi_zona', false, this)">Libre</button>
-          <button class="toggle-btn" onclick="setToggle('vi_zona', true, this)">Ocupada</button>
-        </div>
-        <div id="bloque_vi_zona_tiempo" class="conditional">
-          <div class="field">
-            <label>Tiempo hasta llegar al PS (seg)</label>
-            <input type="number" id="vi_zona_tiempo" value="10" min="1"/>
+        <div class="vi-subsection" id="bloque_vi_servidor_wrap">
+          <div class="vi-subsection-title">Servidor</div>
+          <div class="toggle-group">
+            <button class="toggle-btn active" onclick="setToggle('vi_servidor', true, this)">Presente</button>
+            <button class="toggle-btn" onclick="setToggle('vi_servidor', false, this)">Ausente</button>
+          </div>
+          <div id="bloque_vi_ausente" class="conditional">
+            <div class="field"><label>Tiempo hasta que regresa (seg)</label><input type="number" id="vi_regreso" value="20" min="1"/></div>
           </div>
         </div>
+        <div class="vi-subsection" id="bloque_vi_zona_wrap" style="display:none;">
+          <div class="vi-subsection-title">Zona de seguridad</div>
+          <div class="toggle-group">
+            <button class="toggle-btn active" onclick="setToggle('vi_zona', false, this)">Libre</button>
+            <button class="toggle-btn" onclick="setToggle('vi_zona', true, this)">Ocupada</button>
+          </div>
+          <div id="bloque_vi_zona_tiempo" class="conditional">
+            <div class="field"><label>Tiempo hasta llegar al PS (seg)</label><input type="number" id="vi_zona_tiempo" value="10" min="1"/></div>
+          </div>
+        </div>
+        <div class="vi-subsection" id="bloque_vi_cola_general">
+          <div class="vi-subsection-title">Cola inicial</div>
+          <div class="field"><label>Cantidad de clientes</label><input type="number" id="vi_cola_cantidad" value="0" min="0"/></div>
+          <div class="field">
+            <label>Tiempos de espera (seg, por coma)</label>
+            <input type="text" id="vi_cola_tiempos" placeholder="ej: 30, 45, 60"/>
+            <div class="hint">Opcional. Faltantes se toman como 0.</div>
+          </div>
+        </div>
+        <div class="vi-subsection" id="bloque_vi_cola_prioridad" style="display:none;">
+          <div class="vi-subsection-title">Cola tipo A</div>
+          <div class="field"><label>Cantidad A</label><input type="number" id="vi_cola_a_cantidad" value="0" min="0"/></div>
+          <div class="field"><label>Tiempos A (por coma)</label><input type="text" id="vi_cola_a_tiempos" placeholder="ej: 30, 45"/></div>
+          <div class="vi-subsection-title" style="margin-top:0.8rem;">Cola tipo B</div>
+          <div class="field"><label>Cantidad B</label><input type="number" id="vi_cola_b_cantidad" value="0" min="0"/></div>
+          <div class="field"><label>Tiempos B (por coma)</label><input type="text" id="vi_cola_b_tiempos" placeholder="ej: 20, 35"/></div>
+        </div>
+        <!-- Primera llegada -->
+        <div class="vi-subsection" id="bloque_vi_primera_llegada_general">
+          <div class="vi-subsection-title">Primera llegada</div>
+          <div class="field">
+            <label>Tiempo de la primera llegada (seg)</label>
+            <input type="number" id="vi_primera_llegada" value="" min="1" placeholder="Vacío = aleatorio"/>
+            <div class="hint">Opcional. Si se deja vacío, se genera aleatoriamente.</div>
+          </div>
+        </div>
+        <div class="vi-subsection" id="bloque_vi_primera_llegada_prioridad" style="display:none;">
+          <div class="vi-subsection-title">Primera llegada</div>
+          <div class="field"><label>Primera llegada tipo A (seg)</label><input type="number" id="vi_primera_llegada_a" value="" min="1" placeholder="Vacío = aleatorio"/></div>
+          <div class="field"><label>Primera llegada tipo B (seg)</label><input type="number" id="vi_primera_llegada_b" value="" min="1" placeholder="Vacío = aleatorio"/></div>
+        </div>
       </div>
 
-      <!-- Cola general -->
-      <div class="vi-subsection" id="bloque_vi_cola_general">
-        <div class="vi-subsection-title">Cola inicial</div>
-        <div class="field">
-          <label>Cantidad de clientes</label>
-          <input type="number" id="vi_cola_cantidad" value="0" min="0"/>
-        </div>
-        <div class="field">
-          <label>Tiempos de espera (seg, separados por coma)</label>
-          <input type="text" id="vi_cola_tiempos" placeholder="ej: 30, 45, 60"/>
-          <div class="hint">Opcional. Si hay menos valores que clientes, los restantes se toman como 0.</div>
-        </div>
-      </div>
+    </div><!-- fin modo_simple -->
 
-      <!-- Cola con prioridad -->
-      <div class="vi-subsection" id="bloque_vi_cola_prioridad" style="display:none;">
-        <div class="vi-subsection-title">Cola tipo A</div>
-        <div class="field">
-          <label>Cantidad de clientes A</label>
-          <input type="number" id="vi_cola_a_cantidad" value="0" min="0"/>
-        </div>
-        <div class="field">
-          <label>Tiempos de espera A (seg, separados por coma)</label>
-          <input type="text" id="vi_cola_a_tiempos" placeholder="ej: 30, 45"/>
-          <div class="hint">Opcional.</div>
-        </div>
-        <div class="vi-subsection-title" style="margin-top:0.8rem;">Cola tipo B</div>
-        <div class="field">
-          <label>Cantidad de clientes B</label>
-          <input type="number" id="vi_cola_b_cantidad" value="0" min="0"/>
-        </div>
-        <div class="field">
-          <label>Tiempos de espera B (seg, separados por coma)</label>
-          <input type="text" id="vi_cola_b_tiempos" placeholder="ej: 20, 35"/>
-          <div class="hint">Opcional.</div>
-        </div>
-      </div>
-
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- MODO MULTI                                            -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div id="modo_multi" style="display:none;">
+      <div id="subsistemas_container"></div>
+      <button class="btn-add-sub" onclick="agregarSubsistema()">+ Agregar subsistema</button>
     </div>
-    <!-- fin vi_panel -->
 
     <button class="btn-run" id="btn_run" onclick="ejecutar()">▶ Ejecutar simulación</button>
   </aside>
 
-  <div>
-    <div class="metricas-panel" id="metricas_panel">
-      <h2>Resumen de la simulación</h2>
-      <div id="metricas_contenido"></div>
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PANEL DE RESULTADOS                                   -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div id="results_area">
+    <div class="empty-state" id="empty_global" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;">
+      <span class="icon">⬡</span>
+      Configurá la simulación y presioná Ejecutar
     </div>
-
-    <section class="results">
-      <div class="results-header">
-        <h2>Resultados</h2>
-        <span id="status">—</span>
-      </div>
-      <div class="table-wrap">
-        <div id="empty_state" class="empty-state">
-          <span class="icon">⬡</span>
-          Configurá la simulación y presioná Ejecutar
-        </div>
-        <table id="tabla" style="display:none;">
-          <thead id="thead"></thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-    </section>
+    <div id="results_container" style="display:none;"></div>
   </div>
 
 </div>
 
 <script>
-  const state = {
-    prioridad: false, descanso: false, abandono: false, zona: false,
-    vi_ps: false, vi_servidor: true, vi_zona: false,
-  };
+// ── Estado global ──────────────────────────────────────────────────────────────
+let modo = 'simple';
+let subsistemaCount = 0;
+const state = {
+  prioridad: false, descanso: false, abandono: false, zona: false,
+  vi_ps: false, vi_servidor: true, vi_zona: false,
+};
 
-  function setToggle(key, value, btn) {
-    state[key] = value;
-    const group = btn.parentElement;
-    group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    actualizarVisibilidad();
+// ── Modo ───────────────────────────────────────────────────────────────────────
+function setModo(m, btn) {
+  modo = m;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('modo_simple').style.display = m === 'simple' ? 'block' : 'none';
+  document.getElementById('modo_multi').style.display  = m === 'multi'  ? 'block' : 'none';
+  if (m === 'multi' && subsistemaCount === 0) {
+    agregarSubsistema();
+    agregarSubsistema();
+    agregarSubsistema();
   }
+}
 
-  function actualizarVisibilidad() {
-    toggle('bloque_sin_prioridad', !state.prioridad);
-    toggle('bloque_con_prioridad', state.prioridad);
-    toggle('bloque_descanso', state.descanso);
-    toggle('bloque_abandono', state.abandono);
-    toggle('bloque_zona', state.zona);
-    if (state.abandono) {
-      toggle('bloque_abandono_general', !state.prioridad);
-      toggle('bloque_abandono_prioridad', state.prioridad);
-    }
+// ── Toggles modo simple ────────────────────────────────────────────────────────
+function setToggle(key, value, btn) {
+  state[key] = value;
+  const group = btn.parentElement;
+  group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  actualizarVisibilidad();
+}
 
-    // Vector inicial
-    toggle('bloque_vi_ps', state.vi_ps);
-    toggle('bloque_vi_ausente', !state.vi_servidor);
-
-    // Servidor solo visible si descanso activo
-    document.getElementById('bloque_vi_servidor_wrap').style.display = state.descanso ? 'block' : 'none';
-
-    // Zona solo visible si zona activa
-    document.getElementById('bloque_vi_zona_wrap').style.display = state.zona ? 'block' : 'none';
-    toggle('bloque_vi_zona_tiempo', state.vi_zona);
-
-    // Cola: general o prioridad
-    document.getElementById('bloque_vi_cola_general').style.display   = !state.prioridad ? 'block' : 'none';
-    document.getElementById('bloque_vi_cola_prioridad').style.display =  state.prioridad ? 'block' : 'none';
+function actualizarVisibilidad() {
+  toggle('bloque_sin_prioridad', !state.prioridad);
+  toggle('bloque_con_prioridad', state.prioridad);
+  toggle('bloque_descanso', state.descanso);
+  toggle('bloque_abandono', state.abandono);
+  toggle('bloque_zona', state.zona);
+  if (state.abandono) {
+    toggle('bloque_abandono_general', !state.prioridad);
+    toggle('bloque_abandono_prioridad', state.prioridad);
   }
+  toggle('bloque_vi_ps', state.vi_ps);
+  toggle('bloque_vi_ausente', !state.vi_servidor);
+  document.getElementById('bloque_vi_servidor_wrap').style.display = state.descanso ? 'block' : 'none';
+  document.getElementById('bloque_vi_zona_wrap').style.display = state.zona ? 'block' : 'none';
+  toggle('bloque_vi_zona_tiempo', state.vi_zona);
+  document.getElementById('bloque_vi_cola_general').style.display   = !state.prioridad ? 'block' : 'none';
+  document.getElementById('bloque_vi_cola_prioridad').style.display =  state.prioridad ? 'block' : 'none';
+  const plG = document.getElementById('bloque_vi_primera_llegada_general');
+  const plP = document.getElementById('bloque_vi_primera_llegada_prioridad');
+  if (plG) plG.style.display = !state.prioridad ? 'block' : 'none';
+  if (plP) plP.style.display =  state.prioridad ? 'block' : 'none';
+}
 
-  function toggle(id, visible) {
-    const el = document.getElementById(id);
-    if (el) el.classList.toggle('visible', visible);
-  }
+function toggle(id, visible) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('visible', visible);
+}
 
-  function toggleVectorInicial() {
-    const btn = document.getElementById('vi_toggle_btn');
-    const panel = document.getElementById('vi_panel');
-    const isOpen = panel.classList.toggle('visible');
-    btn.classList.toggle('open', isOpen);
-    btn.querySelector('span').textContent = isOpen ? '▾ Estado inicial del sistema' : '▸ Estado inicial del sistema';
-  }
+function toggleVI(panelId, btnId) {
+  const panel = document.getElementById(panelId);
+  const btn = document.getElementById(btnId);
+  const isOpen = panel.classList.toggle('visible');
+  const span = btn.querySelector('span');
+  if (span) span.textContent = isOpen ? '▾ Estado inicial del sistema' : '▸ Estado inicial del sistema';
+}
 
-  function v(id) {
-    const el = document.getElementById(id);
-    return el ? parseInt(el.value) || null : null;
-  }
+// ── Multi-subsistema ───────────────────────────────────────────────────────────
+function agregarSubsistema() {
+  subsistemaCount++;
+  const id = subsistemaCount;
+  const container = document.getElementById('subsistemas_container');
+  const div = document.createElement('div');
+  div.className = 'sub-card open';
+  div.id = `sub_${id}`;
+  div.innerHTML = buildSubCard(id);
+  container.appendChild(div);
+  actualizarNombresSubsistemas();
+}
 
-  function parseTiempos(id) {
-    const el = document.getElementById(id);
-    if (!el || !el.value.trim()) return [];
-    return el.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
-  }
+function buildSubCard(id) {
+  return `
+    <div class="sub-card-header" onclick="toggleSubCard(${id})">
+      <span class="sub-card-title" id="sub_title_${id}">Subsistema ${id}</span>
+      <div style="display:flex;gap:0.5rem;align-items:center;">
+        <button class="btn-remove-sub" onclick="event.stopPropagation();eliminarSubsistema(${id})">✕</button>
+        <span class="sub-card-arrow">▾</span>
+      </div>
+    </div>
+    <div class="sub-card-body">
+      <div class="field"><label>Nombre</label>
+        <input type="text" id="sub_${id}_nombre" value="Subsistema ${id}" oninput="document.getElementById('sub_title_${id}').textContent=this.value"/>
+      </div>
 
-  function buildVectorInicial() {
-    const vi = {};
+      <div class="sub-inner-title">Tipos de clientes</div>
+      <label style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;">Prioridad A/B</label>
+      <div class="toggle-group" style="margin-top:0.3rem;">
+        <button class="toggle-btn active" id="sub_${id}_btn_np" onclick="setSubToggle(${id},'prioridad',false,this)">Sin prioridad</button>
+        <button class="toggle-btn" onclick="setSubToggle(${id},'prioridad',true,this)">Con prioridad</button>
+      </div>
+      <div id="sub_${id}_sin_prioridad">
+        <div class="sub-inner-title">Llegada de clientes</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="sub_${id}_llegada_min" value="40" min="1"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="sub_${id}_llegada_max" value="60" min="1"/></div>
+        </div>
+      </div>
+      <div id="sub_${id}_con_prioridad" style="display:none;">
+        <div class="sub-inner-title">Llegada tipo A</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="sub_${id}_llegada_a_min" value="80" min="1"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="sub_${id}_llegada_a_max" value="120" min="1"/></div>
+        </div>
+        <div class="sub-inner-title">Llegada tipo B</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="sub_${id}_llegada_b_min" value="40" min="1"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="sub_${id}_llegada_b_max" value="60" min="1"/></div>
+        </div>
+      </div>
 
-    // PS
-    vi.ps_ocupado = state.vi_ps;
-    if (state.vi_ps) vi.ps_tiempo_restante = v('vi_ps_tiempo');
+      <div class="sub-inner-title">Servicio</div>
+      <div class="field-row">
+        <div class="field"><label>Mín</label><input type="number" id="sub_${id}_servicio_min" value="45" min="1"/></div>
+        <div class="field"><label>Máx</label><input type="number" id="sub_${id}_servicio_max" value="50" min="1"/></div>
+      </div>
 
-    // Servidor (solo si descanso activo)
-    if (state.descanso) {
-      vi.servidor_presente = state.vi_servidor;
-      if (!state.vi_servidor) vi.tiempo_regreso_servidor = v('vi_regreso');
-    }
+      <div class="sub-inner-title">Descanso del servidor</div>
+      <div class="toggle-group">
+        <button class="toggle-btn active" onclick="setSubToggle(${id},'descanso',false,this)">No</button>
+        <button class="toggle-btn" onclick="setSubToggle(${id},'descanso',true,this)">Sí</button>
+      </div>
+      <div id="sub_${id}_bloque_descanso" style="display:none;">
+        <div class="sub-inner-title">Tiempo hasta ausencia</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="sub_${id}_salida_min" value="55" min="1"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="sub_${id}_salida_max" value="65" min="1"/></div>
+        </div>
+        <div class="sub-inner-title">Duración del descanso</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="sub_${id}_descanso_min" value="25" min="1"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="sub_${id}_descanso_max" value="35" min="1"/></div>
+        </div>
+      </div>
 
-    // Zona (solo si zona activa)
-    if (state.zona) {
-      vi.zona_ocupada = state.vi_zona;
-      if (state.vi_zona) vi.tiempo_llegada_ps = v('vi_zona_tiempo');
-    }
-
-    // Cola
-    if (state.prioridad) {
-      vi.cola_a_cantidad = v('vi_cola_a_cantidad') || 0;
-      vi.cola_a_tiempos  = parseTiempos('vi_cola_a_tiempos');
-      vi.cola_b_cantidad = v('vi_cola_b_cantidad') || 0;
-      vi.cola_b_tiempos  = parseTiempos('vi_cola_b_tiempos');
-    } else {
-      vi.cola_cantidad = v('vi_cola_cantidad') || 0;
-      vi.cola_tiempos  = parseTiempos('vi_cola_tiempos');
-    }
-
-    return vi;
-  }
-
-  function buildConfig() {
-    const p = state.prioridad, d = state.descanso, a = state.abandono, z = state.zona;
-    return {
-      tiempo_total: v('tiempo_total'),
-      tiene_prioridad: p, tiene_descanso: d, tiene_abandono: a, tiene_zona_seguridad: z,
-      llegada_min:    !p ? v('llegada_min')    : null,
-      llegada_max:    !p ? v('llegada_max')    : null,
-      llegada_a_min:   p ? v('llegada_a_min')  : null,
-      llegada_a_max:   p ? v('llegada_a_max')  : null,
-      llegada_b_min:   p ? v('llegada_b_min')  : null,
-      llegada_b_max:   p ? v('llegada_b_max')  : null,
-      servicio_min: v('servicio_min'), servicio_max: v('servicio_max'),
-      salida_min:    d ? v('salida_min')   : null, salida_max:    d ? v('salida_max')   : null,
-      descanso_min:  d ? v('descanso_min') : null, descanso_max:  d ? v('descanso_max') : null,
-      abandono_a_min: a ? (p ? v('abandono_a_min_p') : v('abandono_a_min')) : null,
-      abandono_a_max: a ? (p ? v('abandono_a_max_p') : v('abandono_a_max')) : null,
-      abandono_b_min: a ? (p ? v('abandono_b_min')   : v('abandono_a_min')) : null,
-      abandono_b_max: a ? (p ? v('abandono_b_max')   : v('abandono_a_max')) : null,
-      caminata_min:  z ? v('caminata_min') : null,
-      caminata_max:  z ? v('caminata_max') : null,
-      vector_inicial: buildVectorInicial(),
-    };
-  }
-
-  function buildHeaders(config) {
-    const p = config.tiene_prioridad, d = config.tiene_descanso;
-    const a = config.tiene_abandono, z = config.tiene_zona_seguridad;
-    const cols = ['Hora actual'];
-    if (p) { cols.push('Próx. llegada A', 'Próx. llegada B'); } else { cols.push('Próx. llegada'); }
-    if (z) cols.push('Llegada al PS');
-    cols.push('Próx. fin serv.');
-    if (d) cols.push('Hora descanso', 'Hora trabajo');
-    if (a) { if (p) cols.push('Abandono A', 'Abandono B'); else cols.push('Hora abandono'); }
-    cols.push('PS');
-    if (z) cols.push('Zona');
-    if (p) cols.push('Cola A', 'Cola B'); else cols.push('Cola');
-    if (d) cols.push('Servidor');
-    cols.push('Gráfico');
-    return cols;
-  }
-
-  function buildRow(fila, config) {
-    const p = config.tiene_prioridad, d = config.tiene_descanso;
-    const a = config.tiene_abandono, z = config.tiene_zona_seguridad;
-    const cells = [];
-    const cell = val => `<td>${val !== null && val !== '' ? val : '<span class="cell-empty">—</span>'}</td>`;
-    const timeCell = val => `<td class="cell-time">${val ?? '<span class="cell-empty">—</span>'}</td>`;
-    const boolCell = val => val
-      ? `<td><span class="badge badge-on">Sí</span></td>`
-      : `<td><span class="badge badge-off">No</span></td>`;
-
-    cells.push(timeCell(fila.tiempo_actual));
-    if (p) { cells.push(cell(fila.proxima_llegada_a), cell(fila.proxima_llegada_b)); }
-    else    { cells.push(cell(fila.proxima_llegada)); }
-    if (z) cells.push(cell(fila.proxima_llegada_al_ps));
-    cells.push(cell(fila.proximo_fin_servicio));
-    if (d) cells.push(cell(fila.proximo_descanso), cell(fila.proximo_trabajo));
-    if (a) { if (p) cells.push(cell(fila.proximo_abandono_a), cell(fila.proximo_abandono_b)); else cells.push(cell(fila.proximo_abandono)); }
-    cells.push(boolCell(fila.puesto_de_servicio));
-    if (z) cells.push(boolCell(fila.zona_seguridad));
-    if (p) {
-      cells.push(
-        `<td><span class="badge badge-a">${fila.cola_a}</span></td>`,
-        `<td><span class="badge badge-b">${fila.cola_b}</span></td>`
-      );
-    } else { cells.push(cell(fila.cola)); }
-    if (d) cells.push(boolCell(fila.servidor));
-    cells.push(`<td class="cell-grafico">${fila.grafico ?? ''}</td>`);
-    return `<tr>${cells.join('')}</tr>`;
-  }
-
-  function card(label, value, colorClass = '') {
-    return `<div class="metrica-card"><div class="label">${label}</div><div class="value ${colorClass}">${value}</div></div>`;
-  }
-
-  function renderMetricas(m, config) {
-    const p = config.tiene_prioridad, d = config.tiene_descanso, a = config.tiene_abandono;
-    let html = '<div class="metricas-grid">';
-    html += card('Clientes atendidos', m.clientes_atendidos, 'green');
-    if (a) html += card('Abandonaron la cola', m.clientes_abandonaron, 'red');
-    html += card('Espera promedio', m.espera_promedio + 's', 'amber');
-    html += card('Espera máxima', m.espera_maxima + 's', 'amber');
-    html += card('Ocupación del servidor', m.ocupacion_servidor + '%', m.ocupacion_servidor > 80 ? 'red' : 'green');
-    html += card('Tiempo PS ocupado', m.tiempo_servidor_ocupado + 's');
-    if (d) html += card('Tiempo servidor ausente', m.tiempo_servidor_ausente + 's', 'red');
-    html += card('Cantidad de descansos', m.cantidad_descansos);
-    html += card('Atendidos hasta 2° descanso', m.clientes_atendidos_hasta_segundo_descanso, 'accent');
-    html += '</div>';
-
-    if (p) {
-      html += `
-        <div class="metricas-seccion">
-          <div class="metricas-seccion-title">Desglose por tipo de cliente</div>
-          <div class="metricas-grid">
-            ${card('Atendidos A', m.clientes_atendidos_a, 'accent')}
-            ${card('Atendidos B', m.clientes_atendidos_b)}
-            ${a ? card('Abandonaron A', m.clientes_abandonaron_a, 'red') : ''}
-            ${a ? card('Abandonaron B', m.clientes_abandonaron_b, 'red') : ''}
-            ${card('Espera prom. A', m.espera_promedio_a + 's', 'amber')}
-            ${card('Espera prom. B', m.espera_promedio_b + 's', 'amber')}
-            ${card('Espera máx. A', m.espera_maxima_a + 's')}
-            ${card('Espera máx. B', m.espera_maxima_b + 's')}
+      <div class="sub-inner-title">Abandono</div>
+      <div class="toggle-group">
+        <button class="toggle-btn active" onclick="setSubToggle(${id},'abandono',false,this)">No</button>
+        <button class="toggle-btn" onclick="setSubToggle(${id},'abandono',true,this)">Sí</button>
+      </div>
+      <div id="sub_${id}_bloque_abandono" style="display:none;">
+        <div id="sub_${id}_abandono_general">
+          <div class="sub-inner-title">Paciencia del cliente</div>
+          <div class="field-row">
+            <div class="field"><label>Mín</label><input type="number" id="sub_${id}_abandono_a_min" value="60" min="1"/></div>
+            <div class="field"><label>Máx</label><input type="number" id="sub_${id}_abandono_a_max" value="120" min="1"/></div>
           </div>
-        </div>`;
+        </div>
+        <div id="sub_${id}_abandono_prioridad" style="display:none;">
+          <div class="sub-inner-title">Paciencia tipo A</div>
+          <div class="field-row">
+            <div class="field"><label>Mín</label><input type="number" id="sub_${id}_abandono_a_min_p" value="90" min="1"/></div>
+            <div class="field"><label>Máx</label><input type="number" id="sub_${id}_abandono_a_max_p" value="120" min="1"/></div>
+          </div>
+          <div class="sub-inner-title">Paciencia tipo B</div>
+          <div class="field-row">
+            <div class="field"><label>Mín</label><input type="number" id="sub_${id}_abandono_b_min" value="60" min="1"/></div>
+            <div class="field"><label>Máx</label><input type="number" id="sub_${id}_abandono_b_max" value="90" min="1"/></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub-inner-title">Zona de seguridad</div>
+      <div class="toggle-group">
+        <button class="toggle-btn active" onclick="setSubToggle(${id},'zona',false,this)">No</button>
+        <button class="toggle-btn" onclick="setSubToggle(${id},'zona',true,this)">Sí</button>
+      </div>
+      <div id="sub_${id}_bloque_zona" style="display:none;">
+        <div class="sub-inner-title">Tiempo de caminata</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="sub_${id}_caminata_min" value="5" min="0"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="sub_${id}_caminata_max" value="15" min="0"/></div>
+        </div>
+      </div>
+
+      <!-- Vector inicial por subsistema -->
+      <button class="vi-toggle-btn" style="margin-top:0.8rem;" onclick="toggleVISub(${id})">
+        <span id="sub_${id}_vi_label">▸ Estado inicial</span><span>▾</span>
+      </button>
+      <div class="vi-panel" id="sub_${id}_vi_panel">
+        <div class="vi-subsection">
+          <div class="vi-subsection-title">Puesto de servicio</div>
+          <div class="toggle-group">
+            <button class="toggle-btn active" onclick="setSubVIToggle(${id},'vi_ps',false,this)">Libre</button>
+            <button class="toggle-btn" onclick="setSubVIToggle(${id},'vi_ps',true,this)">Ocupado</button>
+          </div>
+          <div id="sub_${id}_vi_ps_tiempo_wrap" style="display:none;">
+            <div class="field"><label>Tiempo restante (seg)</label><input type="number" id="sub_${id}_vi_ps_tiempo" value="30" min="1"/></div>
+          </div>
+        </div>
+        <div class="vi-subsection" id="sub_${id}_vi_servidor_wrap" style="display:none;">
+          <div class="vi-subsection-title">Servidor</div>
+          <div class="toggle-group">
+            <button class="toggle-btn active" onclick="setSubVIToggle(${id},'vi_servidor',true,this)">Presente</button>
+            <button class="toggle-btn" onclick="setSubVIToggle(${id},'vi_servidor',false,this)">Ausente</button>
+          </div>
+          <div id="sub_${id}_vi_regreso_wrap" style="display:none;">
+            <div class="field"><label>Tiempo hasta que regresa (seg)</label><input type="number" id="sub_${id}_vi_regreso" value="20" min="1"/></div>
+          </div>
+        </div>
+        <div class="vi-subsection" id="sub_${id}_vi_zona_wrap" style="display:none;">
+          <div class="vi-subsection-title">Zona de seguridad</div>
+          <div class="toggle-group">
+            <button class="toggle-btn active" onclick="setSubVIToggle(${id},'vi_zona',false,this)">Libre</button>
+            <button class="toggle-btn" onclick="setSubVIToggle(${id},'vi_zona',true,this)">Ocupada</button>
+          </div>
+          <div id="sub_${id}_vi_zona_tiempo_wrap" style="display:none;">
+            <div class="field"><label>Tiempo hasta llegar al PS (seg)</label><input type="number" id="sub_${id}_vi_zona_tiempo" value="10" min="1"/></div>
+          </div>
+        </div>
+        <div class="vi-subsection" id="sub_${id}_vi_cola_general_wrap">
+          <div class="vi-subsection-title">Cola inicial</div>
+          <div class="field"><label>Cantidad de clientes</label><input type="number" id="sub_${id}_vi_cola_cantidad" value="0" min="0"/></div>
+          <div class="field">
+            <label>Tiempos de espera (seg, por coma)</label>
+            <input type="text" id="sub_${id}_vi_cola_tiempos" placeholder="ej: 30, 45, 60"/>
+            <div class="hint">Opcional. Faltantes se toman como 0.</div>
+          </div>
+        </div>
+        <div class="vi-subsection" id="sub_${id}_vi_cola_prioridad_wrap" style="display:none;">
+          <div class="vi-subsection-title">Cola tipo A</div>
+          <div class="field"><label>Cantidad A</label><input type="number" id="sub_${id}_vi_cola_a_cantidad" value="0" min="0"/></div>
+          <div class="field"><label>Tiempos A (por coma)</label><input type="text" id="sub_${id}_vi_cola_a_tiempos" placeholder="ej: 30, 45"/></div>
+          <div class="vi-subsection-title" style="margin-top:0.8rem;">Cola tipo B</div>
+          <div class="field"><label>Cantidad B</label><input type="number" id="sub_${id}_vi_cola_b_cantidad" value="0" min="0"/></div>
+          <div class="field"><label>Tiempos B (por coma)</label><input type="text" id="sub_${id}_vi_cola_b_tiempos" placeholder="ej: 20, 35"/></div>
+        </div>
+        <div class="vi-subsection" id="sub_${id}_vi_pl_general_wrap">
+          <div class="vi-subsection-title">Primera llegada</div>
+          <div class="field"><label>Tiempo de la primera llegada (seg)</label><input type="number" id="sub_${id}_vi_primera_llegada" value="" min="1" placeholder="Vacío = aleatorio"/><div class="hint">Opcional.</div></div>
+        </div>
+        <div class="vi-subsection" id="sub_${id}_vi_pl_prioridad_wrap" style="display:none;">
+          <div class="vi-subsection-title">Primera llegada</div>
+          <div class="field"><label>Primera llegada tipo A (seg)</label><input type="number" id="sub_${id}_vi_primera_llegada_a" value="" min="1" placeholder="Vacío = aleatorio"/></div>
+          <div class="field"><label>Primera llegada tipo B (seg)</label><input type="number" id="sub_${id}_vi_primera_llegada_b" value="" min="1" placeholder="Vacío = aleatorio"/></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+const subStates = {};
+
+function setSubToggle(id, key, value, btn) {
+  if (!subStates[id]) subStates[id] = { prioridad: false, descanso: false, abandono: false, zona: false };
+  subStates[id][key] = value;
+  const group = btn.parentElement;
+  group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  actualizarVisibilidadSub(id);
+}
+
+function actualizarVisibilidadSub(id) {
+  const s = subStates[id] || {};
+  const show = (elId, visible) => { const el = document.getElementById(elId); if (el) el.style.display = visible ? 'block' : 'none'; };
+  show(`sub_${id}_sin_prioridad`, !s.prioridad);
+  show(`sub_${id}_con_prioridad`, s.prioridad);
+  show(`sub_${id}_bloque_descanso`, s.descanso);
+  show(`sub_${id}_bloque_abandono`, s.abandono);
+  show(`sub_${id}_bloque_zona`, s.zona);
+  if (s.abandono) {
+    show(`sub_${id}_abandono_general`, !s.prioridad);
+    show(`sub_${id}_abandono_prioridad`, s.prioridad);
+  }
+  // Sync VI panel visibility whenever toggles change
+  actualizarVisibilidadVISub(id);
+}
+
+function toggleSubCard(id) {
+  const card = document.getElementById(`sub_${id}`);
+  card.classList.toggle('open');
+}
+
+function eliminarSubsistema(id) {
+  const el = document.getElementById(`sub_${id}`);
+  if (el) el.remove();
+  actualizarNombresSubsistemas();
+}
+
+function actualizarNombresSubsistemas() {
+  // Solo actualiza el título visual de los que no tienen nombre personalizado
+}
+
+function toggleVISub(id) {
+  const panel = document.getElementById(`sub_${id}_vi_panel`);
+  const label = document.getElementById(`sub_${id}_vi_label`);
+  const isOpen = panel.classList.toggle('visible');
+  if (label) label.textContent = isOpen ? '▾ Estado inicial' : '▸ Estado inicial';
+}
+
+function setSubVIToggle(id, key, value, btn) {
+  if (!subStates[id]) subStates[id] = {};
+  subStates[id][key] = value;
+  const group = btn.parentElement;
+  group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  actualizarVisibilidadVISub(id);
+}
+
+function actualizarVisibilidadVISub(id) {
+  const s = subStates[id] || {};
+  const sub = subStates[id] || {};
+  const show = (elId, visible) => { const el = document.getElementById(elId); if (el) el.style.display = visible ? 'block' : 'none'; };
+  show(`sub_${id}_vi_ps_tiempo_wrap`,      sub.vi_ps === true);
+  show(`sub_${id}_vi_servidor_wrap`,       subStates[id]?.descanso === true);
+  show(`sub_${id}_vi_regreso_wrap`,        sub.vi_servidor === false);
+  show(`sub_${id}_vi_zona_wrap`,           subStates[id]?.zona === true);
+  show(`sub_${id}_vi_zona_tiempo_wrap`,    sub.vi_zona === true);
+  show(`sub_${id}_vi_cola_general_wrap`,   subStates[id]?.prioridad !== true);
+  show(`sub_${id}_vi_cola_prioridad_wrap`, subStates[id]?.prioridad === true);
+  show(`sub_${id}_vi_pl_general_wrap`,     subStates[id]?.prioridad !== true);
+  show(`sub_${id}_vi_pl_prioridad_wrap`,   subStates[id]?.prioridad === true);
+}
+
+function parseTiemposSub(id, key) {
+  const el = document.getElementById(`sub_${id}_${key}`);
+  if (!el || !el.value.trim()) return [];
+  return el.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+}
+
+function buildVISub(id) {
+  const s = subStates[id] || {};
+  const p = s.prioridad, d = s.descanso, z = s.zona;
+  const vi = {};
+  vi.ps_ocupado = s.vi_ps === true;
+  if (vi.ps_ocupado) vi.ps_tiempo_restante = parseInt(document.getElementById(`sub_${id}_vi_ps_tiempo`)?.value) || null;
+  if (d) {
+    vi.servidor_presente = s.vi_servidor !== false;
+    if (!vi.servidor_presente) vi.tiempo_regreso_servidor = parseInt(document.getElementById(`sub_${id}_vi_regreso`)?.value) || null;
+  }
+  if (z) {
+    vi.zona_ocupada = s.vi_zona === true;
+    if (vi.zona_ocupada) vi.tiempo_llegada_ps = parseInt(document.getElementById(`sub_${id}_vi_zona_tiempo`)?.value) || null;
+  }
+  if (p) {
+    vi.cola_a_cantidad = parseInt(document.getElementById(`sub_${id}_vi_cola_a_cantidad`)?.value) || 0;
+    vi.cola_a_tiempos  = parseTiemposSub(id, 'vi_cola_a_tiempos');
+    vi.cola_b_cantidad = parseInt(document.getElementById(`sub_${id}_vi_cola_b_cantidad`)?.value) || 0;
+    vi.cola_b_tiempos  = parseTiemposSub(id, 'vi_cola_b_tiempos');
+    vi.primera_llegada_a = parseInt(document.getElementById(`sub_${id}_vi_primera_llegada_a`)?.value) || null;
+    vi.primera_llegada_b = parseInt(document.getElementById(`sub_${id}_vi_primera_llegada_b`)?.value) || null;
+  } else {
+    vi.cola_cantidad = parseInt(document.getElementById(`sub_${id}_vi_cola_cantidad`)?.value) || 0;
+    vi.cola_tiempos  = parseTiemposSub(id, 'vi_cola_tiempos');
+    vi.primera_llegada = parseInt(document.getElementById(`sub_${id}_vi_primera_llegada`)?.value) || null;
+  }
+  return vi;
+}
+
+function vSub(id, key) {
+  const el = document.getElementById(`sub_${id}_${key}`);
+  return el ? (parseInt(el.value) || null) : null;
+}
+
+function getSubsistemas() {
+  const container = document.getElementById('subsistemas_container');
+  const cards = container.querySelectorAll('.sub-card');
+  return Array.from(cards).map(card => {
+    const id = parseInt(card.id.replace('sub_', ''));
+    const s = subStates[id] || {};
+    const p = s.prioridad, d = s.descanso, a = s.abandono, z = s.zona;
+    return {
+      nombre: document.getElementById(`sub_${id}_nombre`)?.value || `Subsistema ${id}`,
+      tiene_prioridad: p,
+      tiene_descanso: d,
+      tiene_abandono: a,
+      tiene_zona_seguridad: z,
+      llegada_min:    !p ? vSub(id,'llegada_min')    : null,
+      llegada_max:    !p ? vSub(id,'llegada_max')    : null,
+      llegada_a_min:   p ? vSub(id,'llegada_a_min')  : null,
+      llegada_a_max:   p ? vSub(id,'llegada_a_max')  : null,
+      llegada_b_min:   p ? vSub(id,'llegada_b_min')  : null,
+      llegada_b_max:   p ? vSub(id,'llegada_b_max')  : null,
+      servicio_min: vSub(id,'servicio_min'),
+      servicio_max: vSub(id,'servicio_max'),
+      salida_min:    d ? vSub(id,'salida_min')    : null,
+      salida_max:    d ? vSub(id,'salida_max')    : null,
+      descanso_min:  d ? vSub(id,'descanso_min')  : null,
+      descanso_max:  d ? vSub(id,'descanso_max')  : null,
+      abandono_a_min: a ? (p ? vSub(id,'abandono_a_min_p') : vSub(id,'abandono_a_min')) : null,
+      abandono_a_max: a ? (p ? vSub(id,'abandono_a_max_p') : vSub(id,'abandono_a_max')) : null,
+      abandono_b_min: a ? (p ? vSub(id,'abandono_b_min')   : vSub(id,'abandono_a_min')) : null,
+      abandono_b_max: a ? (p ? vSub(id,'abandono_b_max')   : vSub(id,'abandono_a_max')) : null,
+      caminata_min: z ? vSub(id,'caminata_min') : null,
+      caminata_max: z ? vSub(id,'caminata_max') : null,
+      vector_inicial: buildVISub(id),
+    };
+  });
+}
+
+// ── Helpers comunes ────────────────────────────────────────────────────────────
+function v(id) { const el = document.getElementById(id); return el ? parseInt(el.value) || null : null; }
+function parseTiempos(id) {
+  const el = document.getElementById(id);
+  if (!el || !el.value.trim()) return [];
+  return el.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+}
+
+function buildVectorInicial() {
+  const vi = {};
+  vi.ps_ocupado = state.vi_ps;
+  if (state.vi_ps) vi.ps_tiempo_restante = v('vi_ps_tiempo');
+  if (state.descanso) { vi.servidor_presente = state.vi_servidor; if (!state.vi_servidor) vi.tiempo_regreso_servidor = v('vi_regreso'); }
+  if (state.zona) { vi.zona_ocupada = state.vi_zona; if (state.vi_zona) vi.tiempo_llegada_ps = v('vi_zona_tiempo'); }
+  if (state.prioridad) {
+    vi.cola_a_cantidad = v('vi_cola_a_cantidad') || 0; vi.cola_a_tiempos = parseTiempos('vi_cola_a_tiempos');
+    vi.cola_b_cantidad = v('vi_cola_b_cantidad') || 0; vi.cola_b_tiempos = parseTiempos('vi_cola_b_tiempos');
+    vi.primera_llegada_a = v('vi_primera_llegada_a') || null;
+    vi.primera_llegada_b = v('vi_primera_llegada_b') || null;
+  } else {
+    vi.cola_cantidad = v('vi_cola_cantidad') || 0; vi.cola_tiempos = parseTiempos('vi_cola_tiempos');
+    vi.primera_llegada = v('vi_primera_llegada') || null;
+  }
+  return vi;
+}
+
+function buildConfigSimple() {
+  const p = state.prioridad, d = state.descanso, a = state.abandono, z = state.zona;
+  return {
+    tiempo_total: v('tiempo_total'),
+    tiene_prioridad: p, tiene_descanso: d, tiene_abandono: a, tiene_zona_seguridad: z,
+    llegada_min:    !p ? v('llegada_min')    : null, llegada_max:    !p ? v('llegada_max')    : null,
+    llegada_a_min:   p ? v('llegada_a_min')  : null, llegada_a_max:   p ? v('llegada_a_max')  : null,
+    llegada_b_min:   p ? v('llegada_b_min')  : null, llegada_b_max:   p ? v('llegada_b_max')  : null,
+    servicio_min: v('servicio_min'), servicio_max: v('servicio_max'),
+    salida_min: d ? v('salida_min') : null, salida_max: d ? v('salida_max') : null,
+    descanso_min: d ? v('descanso_min') : null, descanso_max: d ? v('descanso_max') : null,
+    abandono_a_min: a ? (p ? v('abandono_a_min_p') : v('abandono_a_min')) : null,
+    abandono_a_max: a ? (p ? v('abandono_a_max_p') : v('abandono_a_max')) : null,
+    abandono_b_min: a ? (p ? v('abandono_b_min') : v('abandono_a_min')) : null,
+    abandono_b_max: a ? (p ? v('abandono_b_max') : v('abandono_a_max')) : null,
+    caminata_min: z ? v('caminata_min') : null, caminata_max: z ? v('caminata_max') : null,
+    vector_inicial: buildVectorInicial(),
+  };
+}
+
+// ── Render resultados ──────────────────────────────────────────────────────────
+function buildHeaders(config) {
+  const p = config.tiene_prioridad, d = config.tiene_descanso, a = config.tiene_abandono, z = config.tiene_zona_seguridad;
+  const cols = ['Hora actual'];
+  if (p) { cols.push('Próx. llegada A', 'Próx. llegada B'); } else { cols.push('Próx. llegada'); }
+  if (z) cols.push('Llegada al PS');
+  cols.push('Próx. fin serv.');
+  if (d) cols.push('Hora descanso', 'Hora trabajo');
+  if (a) { if (p) cols.push('Abandono A', 'Abandono B'); else cols.push('Hora abandono'); }
+  cols.push('PS');
+  if (z) cols.push('Zona');
+  if (p) cols.push('Cola A', 'Cola B'); else cols.push('Cola');
+  if (d) cols.push('Servidor');
+  cols.push('Gráfico');
+  return cols;
+}
+
+function buildRow(fila, config) {
+  const p = config.tiene_prioridad, d = config.tiene_descanso, a = config.tiene_abandono, z = config.tiene_zona_seguridad;
+  const cells = [];
+  const cell = val => `<td>${val !== null && val !== '' ? val : '<span class="cell-empty">—</span>'}</td>`;
+  const timeCell = val => `<td class="cell-time">${val ?? '<span class="cell-empty">—</span>'}</td>`;
+  const boolCell = val => val ? `<td><span class="badge badge-on">Sí</span></td>` : `<td><span class="badge badge-off">No</span></td>`;
+  cells.push(timeCell(fila.tiempo_actual));
+  if (p) { cells.push(cell(fila.proxima_llegada_a), cell(fila.proxima_llegada_b)); } else { cells.push(cell(fila.proxima_llegada)); }
+  if (z) cells.push(cell(fila.proxima_llegada_al_ps));
+  cells.push(cell(fila.proximo_fin_servicio));
+  if (d) cells.push(cell(fila.proximo_descanso), cell(fila.proximo_trabajo));
+  if (a) { if (p) cells.push(cell(fila.proximo_abandono_a), cell(fila.proximo_abandono_b)); else cells.push(cell(fila.proximo_abandono)); }
+  cells.push(boolCell(fila.puesto_de_servicio));
+  if (z) cells.push(boolCell(fila.zona_seguridad));
+  if (p) { cells.push(`<td><span class="badge badge-a">${fila.cola_a}</span></td>`, `<td><span class="badge badge-b">${fila.cola_b}</span></td>`); }
+  else { cells.push(cell(fila.cola)); }
+  if (d) cells.push(boolCell(fila.servidor));
+  cells.push(`<td class="cell-grafico">${fila.grafico ?? ''}</td>`);
+  return `<tr>${cells.join('')}</tr>`;
+}
+
+function card(label, value, colorClass = '') {
+  return `<div class="metrica-card"><div class="label">${label}</div><div class="value ${colorClass}">${value}</div></div>`;
+}
+
+function renderMetricas(m, config) {
+  const p = config.tiene_prioridad, d = config.tiene_descanso, a = config.tiene_abandono;
+  let html = '<div class="metricas-grid">';
+  html += card('Clientes atendidos', m.clientes_atendidos, 'green');
+  if (a) html += card('Abandonaron la cola', m.clientes_abandonaron, 'red');
+  html += card('Espera promedio', m.espera_promedio + 's', 'amber');
+  html += card('Espera máxima', m.espera_maxima + 's', 'amber');
+  html += card('Ocupación del servidor', m.ocupacion_servidor + '%', m.ocupacion_servidor > 80 ? 'red' : 'green');
+  html += card('Tiempo PS ocupado', m.tiempo_servidor_ocupado + 's');
+  if (d) html += card('Tiempo servidor ausente', m.tiempo_servidor_ausente + 's', 'red');
+  html += card('Cantidad de descansos', m.cantidad_descansos);
+  html += card('Atendidos hasta 2° descanso', m.clientes_atendidos_hasta_segundo_descanso, 'accent');
+  html += '</div>';
+  if (p) {
+    html += `<div class="metricas-seccion"><div class="metricas-seccion-title">Desglose por tipo de cliente</div><div class="metricas-grid">
+      ${card('Atendidos A', m.clientes_atendidos_a, 'accent')}${card('Atendidos B', m.clientes_atendidos_b)}
+      ${a ? card('Abandonaron A', m.clientes_abandonaron_a, 'red') : ''}${a ? card('Abandonaron B', m.clientes_abandonaron_b, 'red') : ''}
+      ${card('Espera prom. A', m.espera_promedio_a + 's', 'amber')}${card('Espera prom. B', m.espera_promedio_b + 's', 'amber')}
+      ${card('Espera máx. A', m.espera_maxima_a + 's')}${card('Espera máx. B', m.espera_maxima_b + 's')}
+    </div></div>`;
+  }
+  return html;
+}
+
+function renderResultadoSimple(data, container) {
+  const mp = document.createElement('div');
+  mp.className = 'metricas-panel visible';
+  mp.innerHTML = `<h2>Resumen de la simulación</h2>${renderMetricas(data.metricas, data.config)}`;
+  container.appendChild(mp);
+
+  const results = document.createElement('section');
+  results.className = 'results';
+  const headers = buildHeaders(data.config);
+  results.innerHTML = `
+    <div class="results-header"><h2>Resultados</h2><span id="status" class="done">${data.filas.length} eventos procesados</span></div>
+    <div class="table-wrap">
+      <table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+      <tbody>${data.filas.map(f => buildRow(f, data.config)).join('')}</tbody></table>
+    </div>`;
+  container.appendChild(results);
+}
+
+function renderResultadoMulti(data, container) {
+  const subs = data.subsistemas;
+  if (!subs.length) return;
+
+  // Tabs
+  const tabsWrap = document.createElement('div');
+  tabsWrap.className = 'results tabs-wrap';
+  const tabsDiv = document.createElement('div');
+  tabsDiv.className = 'tabs';
+  subs.forEach((sub, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = sub.nombre || `Subsistema ${i+1}`;
+    btn.onclick = () => {
+      tabsDiv.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      tabsWrap.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tabsWrap.querySelector(`#tab_content_${i}`).classList.add('active');
+    };
+    tabsDiv.appendChild(btn);
+  });
+  tabsWrap.appendChild(tabsDiv);
+
+  subs.forEach((sub, i) => {
+    const content = document.createElement('div');
+    content.className = 'tab-content' + (i === 0 ? ' active' : '');
+    content.id = `tab_content_${i}`;
+    content.style.padding = '1.5rem';
+
+    const mp = document.createElement('div');
+    mp.className = 'metricas-panel visible';
+    mp.style.marginBottom = '1.5rem';
+    mp.innerHTML = `<h2>Resumen — ${sub.nombre}</h2>${renderMetricas(sub.metricas, sub.config)}`;
+    content.appendChild(mp);
+
+    const headers = buildHeaders(sub.config);
+    const tableWrap = document.createElement('div');
+    tableWrap.className = 'table-wrap';
+    tableWrap.innerHTML = `
+      <table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+      <tbody>${sub.filas.map(f => buildRow(f, sub.config)).join('')}</tbody></table>`;
+    content.appendChild(tableWrap);
+    tabsWrap.appendChild(content);
+  });
+
+  container.appendChild(tabsWrap);
+}
+
+// ── Ejecutar ───────────────────────────────────────────────────────────────────
+async function ejecutar() {
+  const btn = document.getElementById('btn_run');
+  const empty = document.getElementById('empty_global');
+  const resultsContainer = document.getElementById('results_container');
+
+  btn.disabled = true;
+  empty.style.display = 'none';
+  resultsContainer.style.display = 'none';
+  resultsContainer.innerHTML = '';
+
+  // Loading placeholder
+  resultsContainer.innerHTML = `<div class="empty-state" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;"><span class="icon" style="opacity:1;">⟳</span>Ejecutando simulación...</div>`;
+  resultsContainer.style.display = 'block';
+
+  try {
+    let data;
+    if (modo === 'simple') {
+      const config = buildConfigSimple();
+      const res = await fetch('/simular', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(config) });
+      data = await res.json();
+      resultsContainer.innerHTML = '';
+      renderResultadoSimple(data, resultsContainer);
+    } else {
+      const subsistemas = getSubsistemas();
+      const payload = { tiempo_total: v('tiempo_total'), subsistemas };
+      const res = await fetch('/simular_multi', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      data = await res.json();
+      resultsContainer.innerHTML = '';
+      renderResultadoMulti(data, resultsContainer);
     }
-    return html;
+  } catch (e) {
+    resultsContainer.innerHTML = `<div class="empty-state" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;"><span class="icon">✕</span>Error al ejecutar la simulación.</div>`;
+    console.error(e);
   }
 
-  async function ejecutar() {
-    const config = buildConfig();
-    const btn = document.getElementById('btn_run');
-    const status = document.getElementById('status');
-    const tbody = document.getElementById('tbody');
-    const thead = document.getElementById('thead');
-    const tabla = document.getElementById('tabla');
-    const empty = document.getElementById('empty_state');
-    const metricasPanel = document.getElementById('metricas_panel');
-    const metricasContenido = document.getElementById('metricas_contenido');
-
-    btn.disabled = true;
-    status.textContent = 'Ejecutando...';
-    status.className = 'running';
-    tbody.innerHTML = '';
-    empty.style.display = 'none';
-    tabla.style.display = 'table';
-    metricasPanel.classList.remove('visible');
-
-    try {
-      const res = await fetch('/simular', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config)
-      });
-
-      const data = await res.json();
-      const headers = buildHeaders(data.config);
-      thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
-      tbody.innerHTML = '';
-
-      for (let i = 0; i < data.filas.length; i++) {
-        const tr = document.createElement('tbody');
-        tr.innerHTML = buildRow(data.filas[i], data.config);
-        tbody.appendChild(tr.firstElementChild);
-        if (i % 50 === 0) await new Promise(r => setTimeout(r, 0));
-      }
-
-      metricasContenido.innerHTML = renderMetricas(data.metricas, data.config);
-      metricasPanel.classList.add('visible');
-      status.textContent = `${data.filas.length} eventos procesados`;
-      status.className = 'done';
-    } catch (e) {
-      status.textContent = 'Error al ejecutar';
-      status.className = '';
-      console.error(e);
-    }
-
-    btn.disabled = false;
-  }
+  btn.disabled = false;
+}
 </script>
 </body>
 </html>

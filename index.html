@@ -137,9 +137,10 @@
     <h2>Configuración</h2>
 
     <!-- Modo de simulación -->
-    <div class="mode-toggle">
+    <div class="mode-toggle" style="display:grid;grid-template-columns:1fr 1fr 1fr;">
       <button class="mode-btn active" onclick="setModo('simple', this)">Un servidor</button>
-      <button class="mode-btn" onclick="setModo('multi', this)">Múltiples subsistemas</button>
+      <button class="mode-btn" onclick="setModo('multi', this)">Subsistemas</button>
+      <button class="mode-btn" onclick="setModo('multips', this)">Cola compartida</button>
     </div>
 
     <!-- Tiempo total (compartido) -->
@@ -326,6 +327,64 @@
       <button class="btn-add-sub" onclick="agregarSubsistema()">+ Agregar subsistema</button>
     </div>
 
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- MODO MULTI-PS (Cola compartida)                       -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div id="modo_multips" style="display:none;">
+
+      <div class="section-title">Llegadas (cola compartida)</div>
+      <label style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Prioridad A/B</label>
+      <div class="toggle-group" style="margin-top:0.3rem;">
+        <button class="toggle-btn active" onclick="setToggleMPS('prioridad', false, this)">Sin prioridad</button>
+        <button class="toggle-btn" onclick="setToggleMPS('prioridad', true, this)">Con prioridad</button>
+      </div>
+      <div id="mps_sin_prioridad">
+        <div class="field-row">
+          <div class="field"><label>Llegada Mín</label><input type="number" id="mps_llegada_min" value="40" min="1"/></div>
+          <div class="field"><label>Llegada Máx</label><input type="number" id="mps_llegada_max" value="60" min="1"/></div>
+        </div>
+      </div>
+      <div id="mps_con_prioridad" style="display:none;">
+        <div class="field-row">
+          <div class="field"><label>Llegada A Mín</label><input type="number" id="mps_llegada_a_min" value="80" min="1"/></div>
+          <div class="field"><label>Llegada A Máx</label><input type="number" id="mps_llegada_a_max" value="120" min="1"/></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Llegada B Mín</label><input type="number" id="mps_llegada_b_min" value="40" min="1"/></div>
+          <div class="field"><label>Llegada B Máx</label><input type="number" id="mps_llegada_b_max" value="60" min="1"/></div>
+        </div>
+      </div>
+
+      <div class="section-title">Abandono (cola compartida)</div>
+      <div class="toggle-group">
+        <button class="toggle-btn active" onclick="setToggleMPS('abandono', false, this)">No</button>
+        <button class="toggle-btn" onclick="setToggleMPS('abandono', true, this)">Sí</button>
+      </div>
+      <div id="mps_bloque_abandono" style="display:none;">
+        <div id="mps_abandono_general">
+          <div class="field-row">
+            <div class="field"><label>Paciencia Mín</label><input type="number" id="mps_abandono_a_min" value="60" min="1"/></div>
+            <div class="field"><label>Paciencia Máx</label><input type="number" id="mps_abandono_a_max" value="120" min="1"/></div>
+          </div>
+        </div>
+        <div id="mps_abandono_prioridad" style="display:none;">
+          <div class="field-row">
+            <div class="field"><label>Paciencia A Mín</label><input type="number" id="mps_abandono_a_min_p" value="90" min="1"/></div>
+            <div class="field"><label>Paciencia A Máx</label><input type="number" id="mps_abandono_a_max_p" value="120" min="1"/></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Paciencia B Mín</label><input type="number" id="mps_abandono_b_min" value="60" min="1"/></div>
+            <div class="field"><label>Paciencia B Máx</label><input type="number" id="mps_abandono_b_max" value="90" min="1"/></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Puestos de servicio</div>
+      <div id="ps_container"></div>
+      <button class="btn-add-sub" onclick="agregarPS()">+ Agregar puesto de servicio</button>
+
+    </div><!-- fin modo_multips -->
+
     <button class="btn-run" id="btn_run" onclick="ejecutar()">▶ Ejecutar simulación</button>
   </aside>
 
@@ -356,12 +415,14 @@ function setModo(m, btn) {
   modo = m;
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('modo_simple').style.display = m === 'simple' ? 'block' : 'none';
-  document.getElementById('modo_multi').style.display  = m === 'multi'  ? 'block' : 'none';
+  document.getElementById('modo_simple').style.display   = m === 'simple'  ? 'block' : 'none';
+  document.getElementById('modo_multi').style.display    = m === 'multi'   ? 'block' : 'none';
+  document.getElementById('modo_multips').style.display  = m === 'multips' ? 'block' : 'none';
   if (m === 'multi' && subsistemaCount === 0) {
-    agregarSubsistema();
-    agregarSubsistema();
-    agregarSubsistema();
+    agregarSubsistema(); agregarSubsistema(); agregarSubsistema();
+  }
+  if (m === 'multips' && psCount === 0) {
+    agregarPS(); agregarPS(); agregarPS();
   }
 }
 
@@ -790,7 +851,7 @@ function buildConfigSimple() {
 // ── Render resultados ──────────────────────────────────────────────────────────
 function buildHeaders(config) {
   const p = config.tiene_prioridad, d = config.tiene_descanso, a = config.tiene_abandono, z = config.tiene_zona_seguridad;
-  const cols = ['Hora actual'];
+  const cols = ['Hora actual', 'Evento'];
   if (p) { cols.push('Próx. llegada A', 'Próx. llegada B'); } else { cols.push('Próx. llegada'); }
   if (z) cols.push('Llegada al PS');
   cols.push('Próx. fin serv.');
@@ -942,13 +1003,19 @@ async function ejecutar() {
       data = await res.json();
       resultsContainer.innerHTML = '';
       renderResultadoSimple(data, resultsContainer);
-    } else {
+    } else if (modo === 'multi') {
       const subsistemas = getSubsistemas();
       const payload = { tiempo_total: v('tiempo_total'), subsistemas };
       const res = await fetch('/simular_multi', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       data = await res.json();
       resultsContainer.innerHTML = '';
       renderResultadoMulti(data, resultsContainer);
+    } else {
+      const payload = buildConfigMultiPS();
+      const res = await fetch('/simular_multi_ps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      data = await res.json();
+      resultsContainer.innerHTML = '';
+      renderResultadoMultiPS(data, resultsContainer);
     }
   } catch (e) {
     resultsContainer.innerHTML = `<div class="empty-state" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;"><span class="icon">✕</span>Error al ejecutar la simulación.</div>`;
@@ -957,6 +1024,336 @@ async function ejecutar() {
 
   btn.disabled = false;
 }
+
+// ── Estado modo multi-PS ───────────────────────────────────────────────────────
+let psCount = 0;
+const mpsState = { prioridad: false, abandono: false };
+const psStates = {};
+
+function setToggleMPS(key, value, btn) {
+  mpsState[key] = value;
+  const group = btn.parentElement;
+  group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  actualizarVisibilidadMPS();
+}
+
+function actualizarVisibilidadMPS() {
+  const show = (id, visible) => { const el = document.getElementById(id); if (el) el.style.display = visible ? 'block' : 'none'; };
+  show('mps_sin_prioridad', !mpsState.prioridad);
+  show('mps_con_prioridad', mpsState.prioridad);
+  show('mps_bloque_abandono', mpsState.abandono);
+  if (mpsState.abandono) {
+    show('mps_abandono_general', !mpsState.prioridad);
+    show('mps_abandono_prioridad', mpsState.prioridad);
+  }
+}
+
+function agregarPS() {
+  psCount++;
+  const id = psCount;
+  const container = document.getElementById('ps_container');
+  const div = document.createElement('div');
+  div.className = 'sub-card open';
+  div.id = `ps_${id}`;
+  div.innerHTML = buildPSCard(id);
+  container.appendChild(div);
+}
+
+function buildPSCard(id) {
+  return `
+    <div class="sub-card-header" onclick="toggleSubCard('ps_${id}')">
+      <span class="sub-card-title" id="ps_title_${id}">PS ${id}</span>
+      <div style="display:flex;gap:0.5rem;align-items:center;">
+        <button class="btn-remove-sub" onclick="event.stopPropagation();eliminarPS(${id})">✕</button>
+        <span class="sub-card-arrow">▾</span>
+      </div>
+    </div>
+    <div class="sub-card-body">
+      <div class="field"><label>Nombre</label>
+        <input type="text" id="ps_${id}_nombre" value="PS ${id}" oninput="document.getElementById('ps_title_${id}').textContent=this.value"/>
+      </div>
+
+      <div class="sub-inner-title">Tiempo de servicio</div>
+      <div class="field-row">
+        <div class="field"><label>Mín</label><input type="number" id="ps_${id}_servicio_min" value="45" min="1"/></div>
+        <div class="field"><label>Máx</label><input type="number" id="ps_${id}_servicio_max" value="50" min="1"/></div>
+      </div>
+
+      <div class="sub-inner-title">Descanso del servidor</div>
+      <div class="toggle-group">
+        <button class="toggle-btn active" onclick="setPSToggle(${id},'descanso',false,this)">No</button>
+        <button class="toggle-btn" onclick="setPSToggle(${id},'descanso',true,this)">Sí</button>
+      </div>
+      <div id="ps_${id}_bloque_descanso" style="display:none;">
+        <div class="sub-inner-title">Tiempo hasta ausencia</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="ps_${id}_salida_min" value="55" min="1"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="ps_${id}_salida_max" value="65" min="1"/></div>
+        </div>
+        <div class="sub-inner-title">Duración del descanso</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="ps_${id}_descanso_min" value="25" min="1"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="ps_${id}_descanso_max" value="35" min="1"/></div>
+        </div>
+      </div>
+
+      <div class="sub-inner-title">Zona de seguridad</div>
+      <div class="toggle-group">
+        <button class="toggle-btn active" onclick="setPSToggle(${id},'zona',false,this)">No</button>
+        <button class="toggle-btn" onclick="setPSToggle(${id},'zona',true,this)">Sí</button>
+      </div>
+      <div id="ps_${id}_bloque_zona" style="display:none;">
+        <div class="sub-inner-title">Tiempo de caminata</div>
+        <div class="field-row">
+          <div class="field"><label>Mín</label><input type="number" id="ps_${id}_caminata_min" value="5" min="0"/></div>
+          <div class="field"><label>Máx</label><input type="number" id="ps_${id}_caminata_max" value="15" min="0"/></div>
+        </div>
+      </div>
+
+      <!-- Vector inicial por PS -->
+      <button class="vi-toggle-btn" style="margin-top:0.8rem;" onclick="toggleVIPS(${id})">
+        <span id="ps_${id}_vi_label">▸ Estado inicial</span><span>▾</span>
+      </button>
+      <div class="vi-panel" id="ps_${id}_vi_panel">
+        <div class="vi-subsection">
+          <div class="vi-subsection-title">Puesto de servicio</div>
+          <div class="toggle-group">
+            <button class="toggle-btn active" onclick="setPSVIToggle(${id},'vi_ps',false,this)">Libre</button>
+            <button class="toggle-btn" onclick="setPSVIToggle(${id},'vi_ps',true,this)">Ocupado</button>
+          </div>
+          <div id="ps_${id}_vi_ps_wrap" style="display:none;">
+            <div class="field"><label>Tiempo restante (seg)</label><input type="number" id="ps_${id}_vi_ps_tiempo" value="30" min="1"/></div>
+          </div>
+        </div>
+        <div class="vi-subsection" id="ps_${id}_vi_servidor_wrap" style="display:none;">
+          <div class="vi-subsection-title">Servidor</div>
+          <div class="toggle-group">
+            <button class="toggle-btn active" onclick="setPSVIToggle(${id},'vi_servidor',true,this)">Presente</button>
+            <button class="toggle-btn" onclick="setPSVIToggle(${id},'vi_servidor',false,this)">Ausente</button>
+          </div>
+          <div id="ps_${id}_vi_regreso_wrap" style="display:none;">
+            <div class="field"><label>Tiempo hasta que regresa (seg)</label><input type="number" id="ps_${id}_vi_regreso" value="20" min="1"/></div>
+          </div>
+        </div>
+        <div class="vi-subsection" id="ps_${id}_vi_zona_wrap" style="display:none;">
+          <div class="vi-subsection-title">Zona de seguridad</div>
+          <div class="toggle-group">
+            <button class="toggle-btn active" onclick="setPSVIToggle(${id},'vi_zona',false,this)">Libre</button>
+            <button class="toggle-btn" onclick="setPSVIToggle(${id},'vi_zona',true,this)">Ocupada</button>
+          </div>
+          <div id="ps_${id}_vi_zona_wrap2" style="display:none;">
+            <div class="field"><label>Tiempo hasta llegar al PS (seg)</label><input type="number" id="ps_${id}_vi_zona_tiempo" value="10" min="1"/></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function setPSToggle(id, key, value, btn) {
+  if (!psStates[id]) psStates[id] = { descanso: false, zona: false };
+  psStates[id][key] = value;
+  const group = btn.parentElement;
+  group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const show = (elId, visible) => { const el = document.getElementById(elId); if (el) el.style.display = visible ? 'block' : 'none'; };
+  show(`ps_${id}_bloque_descanso`, psStates[id].descanso);
+  show(`ps_${id}_bloque_zona`, psStates[id].zona);
+  show(`ps_${id}_vi_servidor_wrap`, psStates[id].descanso);
+  show(`ps_${id}_vi_zona_wrap`, psStates[id].zona);
+}
+
+function setPSVIToggle(id, key, value, btn) {
+  if (!psStates[id]) psStates[id] = {};
+  psStates[id][key] = value;
+  const group = btn.parentElement;
+  group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const show = (elId, visible) => { const el = document.getElementById(elId); if (el) el.style.display = visible ? 'block' : 'none'; };
+  show(`ps_${id}_vi_ps_wrap`,     psStates[id].vi_ps === true);
+  show(`ps_${id}_vi_regreso_wrap`, psStates[id].vi_servidor === false);
+  show(`ps_${id}_vi_zona_wrap2`,  psStates[id].vi_zona === true);
+}
+
+function toggleVIPS(id) {
+  const panel = document.getElementById(`ps_${id}_vi_panel`);
+  const label = document.getElementById(`ps_${id}_vi_label`);
+  const isOpen = panel.classList.toggle('visible');
+  if (label) label.textContent = isOpen ? '▾ Estado inicial' : '▸ Estado inicial';
+}
+
+function eliminarPS(id) {
+  const el = document.getElementById(`ps_${id}`);
+  if (el) el.remove();
+}
+
+function vPS(id, key) {
+  const el = document.getElementById(`ps_${id}_${key}`);
+  return el ? (parseInt(el.value) || null) : null;
+}
+
+function getPuestos() {
+  const container = document.getElementById('ps_container');
+  const cards = container.querySelectorAll('.sub-card');
+  return Array.from(cards).map(card => {
+    const id = parseInt(card.id.replace('ps_', ''));
+    const s = psStates[id] || {};
+    const vi = {};
+    vi.ps_ocupado = s.vi_ps === true;
+    if (vi.ps_ocupado) vi.ps_tiempo_restante = vPS(id, 'vi_ps_tiempo');
+    if (s.descanso) {
+      vi.servidor_presente = s.vi_servidor !== false;
+      if (!vi.servidor_presente) vi.tiempo_regreso_servidor = vPS(id, 'vi_regreso');
+    }
+    if (s.zona) {
+      vi.zona_ocupada = s.vi_zona === true;
+      if (vi.zona_ocupada) vi.tiempo_llegada_ps = vPS(id, 'vi_zona_tiempo');
+    }
+    return {
+      nombre: document.getElementById(`ps_${id}_nombre`)?.value || `PS ${id}`,
+      servicio_min: vPS(id, 'servicio_min'),
+      servicio_max: vPS(id, 'servicio_max'),
+      tiene_descanso: s.descanso === true,
+      salida_min:   s.descanso ? vPS(id, 'salida_min')   : null,
+      salida_max:   s.descanso ? vPS(id, 'salida_max')   : null,
+      descanso_min: s.descanso ? vPS(id, 'descanso_min') : null,
+      descanso_max: s.descanso ? vPS(id, 'descanso_max') : null,
+      tiene_zona_seguridad: s.zona === true,
+      caminata_min: s.zona ? vPS(id, 'caminata_min') : null,
+      caminata_max: s.zona ? vPS(id, 'caminata_max') : null,
+      vector_inicial: vi,
+    };
+  });
+}
+
+function buildConfigMultiPS() {
+  const p = mpsState.prioridad, a = mpsState.abandono;
+  const config_global = {
+    tiene_prioridad: p,
+    tiene_abandono: a,
+    llegada_min:    !p ? v('mps_llegada_min')    : null,
+    llegada_max:    !p ? v('mps_llegada_max')    : null,
+    llegada_a_min:   p ? v('mps_llegada_a_min')  : null,
+    llegada_a_max:   p ? v('mps_llegada_a_max')  : null,
+    llegada_b_min:   p ? v('mps_llegada_b_min')  : null,
+    llegada_b_max:   p ? v('mps_llegada_b_max')  : null,
+    abandono_a_min: a ? (p ? v('mps_abandono_a_min_p') : v('mps_abandono_a_min')) : null,
+    abandono_a_max: a ? (p ? v('mps_abandono_a_max_p') : v('mps_abandono_a_max')) : null,
+    abandono_b_min: a ? (p ? v('mps_abandono_b_min') : v('mps_abandono_a_min')) : null,
+    abandono_b_max: a ? (p ? v('mps_abandono_b_max') : v('mps_abandono_a_max')) : null,
+  };
+  return { tiempo_total: v('tiempo_total'), config_global, puestos: getPuestos() };
+}
+
+// ── Render multi-PS ────────────────────────────────────────────────────────────
+function renderResultadoMultiPS(data, container) {
+  const config_global = data.config_global;
+  const configs_ps = data.configs_ps;
+  const p = config_global.tiene_prioridad;
+  const a = config_global.tiene_abandono;
+  const n_ps = configs_ps.length;
+
+  // Métricas globales
+  const m = data.metricas;
+  let htmlMetricas = '<div class="metricas-panel visible" style="margin-bottom:1.5rem;"><h2>Resumen global</h2><div class="metricas-grid">';
+  htmlMetricas += card('Clientes atendidos', m.clientes_atendidos, 'green');
+  if (a) htmlMetricas += card('Abandonaron', m.clientes_abandonaron, 'red');
+  htmlMetricas += card('Espera promedio', m.espera_promedio + 's', 'amber');
+  htmlMetricas += card('Espera máxima', m.espera_maxima + 's', 'amber');
+  htmlMetricas += '</div>';
+
+  if (p) {
+    htmlMetricas += `<div class="metricas-seccion"><div class="metricas-seccion-title">Por tipo</div><div class="metricas-grid">
+      ${card('Atendidos A', m.clientes_atendidos_a, 'accent')}${card('Atendidos B', m.clientes_atendidos_b)}
+      ${a ? card('Abandonaron A', m.clientes_abandonaron_a, 'red') : ''}${a ? card('Abandonaron B', m.clientes_abandonaron_b, 'red') : ''}
+      ${card('Espera prom. A', m.espera_promedio_a + 's', 'amber')}${card('Espera prom. B', m.espera_promedio_b + 's', 'amber')}
+    </div></div>`;
+  }
+
+  htmlMetricas += '<div class="metricas-seccion"><div class="metricas-seccion-title">Por puesto de servicio</div><div class="metricas-grid">';
+  for (const ps of m.por_ps) {
+    htmlMetricas += card(`${ps.nombre} — Ocupación`, ps.ocupacion + '%', ps.ocupacion > 80 ? 'red' : 'green');
+    htmlMetricas += card(`${ps.nombre} — Tiempo ocupado`, ps.tiempo_ocupado + 's');
+    htmlMetricas += card(`${ps.nombre} — Descansos`, ps.cantidad_descansos);
+    if (ps.tiempo_ausente !== undefined) htmlMetricas += card(`${ps.nombre} — Tiempo ausente`, ps.tiempo_ausente + 's', 'red');
+  }
+  htmlMetricas += '</div></div></div>';
+
+  const mpDiv = document.createElement('div');
+  mpDiv.innerHTML = htmlMetricas;
+  container.appendChild(mpDiv);
+
+  // Tabla unificada
+  const resultsDiv = document.createElement('section');
+  resultsDiv.className = 'results';
+
+  // Construir encabezados
+  let headers = ['Hora actual', 'Evento'];
+  if (p) { headers.push('Próx. llegada A', 'Próx. llegada B'); } else { headers.push('Próx. llegada'); }
+  if (a) { if (p) { headers.push('Abandono A', 'Abandono B'); } else { headers.push('Hora abandono'); } }
+  if (p) { headers.push('Cola A', 'Cola B'); } else { headers.push('Cola'); }
+
+  for (let i = 0; i < n_ps; i++) {
+    const nombre = configs_ps[i].nombre || `PS${i+1}`;
+    headers.push(`${nombre} — Fin serv.`);
+    if (configs_ps[i].tiene_zona_seguridad) headers.push(`${nombre} — Llegada PS`);
+    if (configs_ps[i].tiene_descanso) { headers.push(`${nombre} — Descanso`, `${nombre} — Trabajo`); }
+    headers.push(`${nombre} — Ocupado`);
+    if (configs_ps[i].tiene_zona_seguridad) headers.push(`${nombre} — Zona`);
+    if (configs_ps[i].tiene_descanso) headers.push(`${nombre} — Servidor`);
+  }
+  headers.push('Estado del sistema');  // Una sola columna gráfica al final
+
+  const cell = val => `<td>${val !== null && val !== '' ? val : '<span class="cell-empty">—</span>'}</td>`;
+  const timeCell = val => `<td class="cell-time">${val ?? '<span class="cell-empty">—</span>'}</td>`;
+  const boolCell = val => val ? `<td><span class="badge badge-on">Sí</span></td>` : `<td><span class="badge badge-off">No</span></td>`;
+
+  const rows = data.filas.map(fila => {
+    let cells = '';
+    cells += timeCell(fila.tiempo_actual);
+    cells += `<td style="font-size:0.72rem;color:var(--muted);white-space:nowrap;">${fila.evento_tipo ?? ''}</td>`;
+    if (p) { cells += cell(fila.proxima_llegada_a) + cell(fila.proxima_llegada_b); }
+    else    { cells += cell(fila.proxima_llegada); }
+    if (a) { if (p) { cells += cell(fila.proximo_abandono_a) + cell(fila.proximo_abandono_b); } else { cells += cell(fila.proximo_abandono); } }
+    if (p) { cells += `<td><span class="badge badge-a">${fila.cola_a}</span></td><td><span class="badge badge-b">${fila.cola_b}</span></td>`; }
+    else    { cells += cell(fila.cola); }
+
+    for (let i = 0; i < n_ps; i++) {
+      const ps = fila.puestos[i];
+      cells += cell(ps.proximo_fin_servicio);
+      if (configs_ps[i].tiene_zona_seguridad) cells += cell(ps.proxima_llegada_al_ps);
+      if (configs_ps[i].tiene_descanso) { cells += cell(ps.proximo_descanso) + cell(ps.proximo_trabajo); }
+      cells += boolCell(ps.ocupado);
+      if (configs_ps[i].tiene_zona_seguridad) cells += boolCell(ps.zona_ocupada);
+      if (configs_ps[i].tiene_descanso) cells += boolCell(ps.servidor_presente);
+    }
+
+    // Columna gráfica unificada: una línea por PS + línea de cola compartida
+    const graficoLineas = fila.puestos.map((ps, i) => {
+      const nombre = configs_ps[i].nombre || `PS${i+1}`;
+      return `<span style="font-size:0.7rem;color:var(--muted);">${nombre}</span> ${ps.grafico}`;
+    });
+    // Línea de cola compartida
+    const colaStr = p
+      ? `<span style="font-size:0.7rem;color:var(--muted);">Cola</span> ${'A'.repeat(fila.cola_a || 0)}${'B'.repeat(fila.cola_b || 0)}`
+      : `<span style="font-size:0.7rem;color:var(--muted);">Cola</span> ${'O'.repeat(fila.cola || 0)}`;
+    graficoLineas.push(colaStr);
+    cells += `<td class="cell-grafico" style="line-height:1.8;">${graficoLineas.join('<br>')}</td>`;
+
+    return `<tr>${cells}</tr>`;
+  });
+
+  resultsDiv.innerHTML = `
+    <div class="results-header"><h2>Resultados</h2><span class="done">${data.filas.length} eventos procesados</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+        <tbody>${rows.join('')}</tbody>
+      </table>
+    </div>`;
+  container.appendChild(resultsDiv);
+}
+
 </script>
 </body>
 </html>

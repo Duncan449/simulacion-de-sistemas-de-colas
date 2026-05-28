@@ -32,6 +32,7 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
         self.cliente_actual = None  # Variable para almacenar el cliente que está siendo atendido actualmente (si hay alguno)
         self.cantidad_descansos = 0  # Contador de la cantidad de veces que el servidor descansó
         self.clientes_atendidos_hasta_segundo_descanso = 0  # Contador de clientes atendidos hasta el segundo descanso del servidor 
+        self.evento_actual = None  # Variable para almacenar el evento que se está procesando actualmente (para mostrar en la tabla)
 
         # Aplicar vector inicial
         self._aplicar_vector_inicial()
@@ -879,6 +880,7 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
 
         # Imprimir encabezados de la tabla según configuración
         self._imprimir_encabezado()
+        self.evento_actual = None  # Inicializar el evento actual como None para la primera impresión
         self._imprimir_fila()   # Para imprimir el vector inicial t=0
 
 
@@ -954,6 +956,7 @@ class Simulacion:  # Clase para representar la simulación del sistema de colas
                 break  # Si el tiempo del evento excede el tiempo total de simulación, se detiene la simulación
 
             self.tiempo_actual = evento[0]  # Actualizar el tiempo actual al tiempo del evento
+            self.evento_actual = evento[2]  # Guardar el evento actual para su impresión en la tabla
 
             if evento[2].tipo == TipoEvento.LLEGADA:
                 self.procesar_llegada(evento[2])  # Procesar el evento de llegada
